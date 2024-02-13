@@ -148,6 +148,7 @@ public class Navigation {
 			resetButtons(original, setCourse);
 			rightlabel.setText("" + ((JSlider) e.getSource()).getValue());
 			course( ((JSlider) e.getSource()).getValue());
+			Navigation.isCourseSet = false;
 			compass.repaint();
 		});
 

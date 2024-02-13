@@ -14,7 +14,7 @@ import javax.swing.SwingConstants;
 public class Navigation {
 	private static boolean isCourseSet = false;
 	private static Integer relative = 0;
-	private static Integer bearing = -10;
+	private static Integer bearing = -20;
 	private static Integer coursebearing = 0;
 	private static JPanel compass = new JPanel() {
 		@Override
@@ -26,14 +26,14 @@ public class Navigation {
 			g.drawLine(60+100, 120+100, 
 					60+100+(int)(100*Math.sin((relative+bearing)/(180.0/Math.PI))), 
 					120+100-(int)(100*Math.cos((relative+bearing)/(180.0/Math.PI))));
-			g.drawChars("N".toCharArray(), 0, 1, 60+100+(int)(100*Math.sin((relative+bearing)/(180.0/Math.PI))), 
-					120+100-(int)(100*Math.cos((relative+bearing)/(180.0/Math.PI))));
-			g.drawChars("E".toCharArray(), 0, 1, 60+100+(int)(100*Math.sin((relative+bearing+90)/(180.0/Math.PI))), 
-					120+100-(int)(100*Math.cos((relative+bearing+90)/(180.0/Math.PI))));
-			g.drawChars("S".toCharArray(), 0, 1, 60+100+(int)(100*Math.sin((relative+bearing+180)/(180.0/Math.PI))), 
-					120+100-(int)(100*Math.cos((relative+bearing+180)/(180.0/Math.PI))));
-			g.drawChars("W".toCharArray(), 0, 1, 60+100+(int)(100*Math.sin((relative+bearing+270)/(180.0/Math.PI))), 
-					120+100-(int)(100*Math.cos((relative+bearing+270)/(180.0/Math.PI))));
+			g.drawChars("N".toCharArray(), 0, 1, 60+100+(int)(100*Math.sin((relative)/(180.0/Math.PI))), 
+					120+100-(int)(100*Math.cos((relative)/(180.0/Math.PI))));
+			g.drawChars("E".toCharArray(), 0, 1, 60+100+(int)(100*Math.sin((relative+90)/(180.0/Math.PI))), 
+					120+100-(int)(100*Math.cos((relative+90)/(180.0/Math.PI))));
+			g.drawChars("S".toCharArray(), 0, 1, 60+100+(int)(100*Math.sin((relative+180)/(180.0/Math.PI))), 
+					120+100-(int)(100*Math.cos((relative+180)/(180.0/Math.PI))));
+			g.drawChars("W".toCharArray(), 0, 1, 60+100+(int)(100*Math.sin((relative+270)/(180.0/Math.PI))), 
+					120+100-(int)(100*Math.cos((relative+270)/(180.0/Math.PI))));
 			if (!isCourseSet) {
 				g.setColor(Color.RED);
 			} else {

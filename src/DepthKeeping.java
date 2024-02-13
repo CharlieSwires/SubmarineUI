@@ -9,7 +9,7 @@ import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.SwingConstants;
 
-public class SliderExample {
+public class DepthKeeping {
 	public enum EMERGENCY {
 		ALL_STOP, FULL_LEFT, FULL_RIGHT, ALL_FULL, ALL_BACK
 	}
@@ -149,7 +149,7 @@ public class SliderExample {
 		frame.setVisible(true);
 	}
 
-	private static void quickControls(SliderExample.EMERGENCY action, JSlider slider, JSlider rightslider) {
+	private static void quickControls(DepthKeeping.EMERGENCY action, JSlider slider, JSlider rightslider) {
 		switch (action) {
 		case ALL_STOP:
 			slider.setValue(0);

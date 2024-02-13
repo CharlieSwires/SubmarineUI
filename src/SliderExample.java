@@ -16,7 +16,7 @@ public class SliderExample {
 
 	public static void main(String[] args) {
 		// Creating the JFrame for the application
-		JFrame frame = new JFrame("JSlider Example");
+		JFrame frame = new JFrame("Engine Room");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setSize(500, 550);
 

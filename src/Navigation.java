@@ -70,6 +70,7 @@ public class Navigation {
 		@Override
 		public void run() {
 	        PIDController pidController = new PIDController(0.1, 0.01, 0.05);
+	        //TODO inverse dot product so that it goes the nearest way not left if neg right if not
 	        pidController.setSetpoint(coursebearing); // Set desired setpoint
 	        Integer previousControlOutput = null;
 			while (true) {

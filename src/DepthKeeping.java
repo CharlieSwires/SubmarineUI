@@ -34,9 +34,9 @@ public class DepthKeeping {
 					120+100+10-(int)(100*Math.cos((+180)/(180.0/Math.PI))));
 			g.drawChars(("Actual Depth:"+getDepth()+"    ").toCharArray(), 0, 18, 60+100+(int)(100*Math.sin((+180)/(180.0/Math.PI))), 
 					120+100+30-(int)(100*Math.cos((+180)/(180.0/Math.PI))));
-			
-				g.setColor(Color.GREEN);
-			
+
+			g.setColor(Color.GREEN);
+
 			g.drawLine(60+100, 120+100, 
 					60+100+(int)(100*Math.sin((-requiredAngle+90)/(180.0/Math.PI))), 
 					120+100-(int)(100*Math.cos((-requiredAngle+90)/(180.0/Math.PI))));
@@ -126,13 +126,13 @@ public class DepthKeeping {
 		diveAngle.addChangeListener(e -> {
 			resetButtons(original, crashDive, scuttle, emergencySurface,freeze);
 			label.setText("" + ((JSlider) e.getSource()).getValue());
-		reference( ((JSlider) e.getSource()).getValue());
-		diveAngleGauge.repaint();});
+			reference( ((JSlider) e.getSource()).getValue());
+			diveAngleGauge.repaint();});
 		// Adding a change listener to the slider to update the label when the slider value changes
 		diveDepth.addChangeListener(e -> {
 			resetButtons(original, crashDive, scuttle, emergencySurface,freeze);
 			rightlabel.setText("" + ((JSlider) e.getSource()).getValue());
-		diveAngleGauge.repaint();});
+			diveAngleGauge.repaint();});
 		crashDive.addActionListener(e -> {
 			resetButtons(original, crashDive, scuttle, emergencySurface,freeze);
 			quickControls(EMERGENCY.CRASH_DIVE, diveAngle, diveDepth);
@@ -155,7 +155,7 @@ public class DepthKeeping {
 	}
 
 	private static void reference(int value) {
-requiredAngle = value;		
+		requiredAngle = value;		
 	}
 
 	private static void quickControls(DepthKeeping.EMERGENCY action, JSlider diveAngle, JSlider diveDepth) {
@@ -192,17 +192,17 @@ requiredAngle = value;
 
 	private static void allFull() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	private static void rudderZero() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	private static void allStop() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	private static int getDepth() {

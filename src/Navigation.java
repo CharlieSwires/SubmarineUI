@@ -22,25 +22,25 @@ public class Navigation {
 			super.paintComponent(g);
 			int bearing = Navigation.bearing;
 			int relative = Navigation.relative;
-			g.drawArc(60, 120, 200, 200, 0, 360);
-			g.drawLine(60+100, 120+100, 
-					60+100+(int)(100*Math.sin((relative+bearing)/(180.0/Math.PI))), 
+			g.drawArc(30, 120, 200, 200, 0, 360);
+			g.drawLine(30+100, 120+100, 
+					30+100+(int)(100*Math.sin((relative+bearing)/(180.0/Math.PI))), 
 					120+100-(int)(100*Math.cos((relative+bearing)/(180.0/Math.PI))));
-			g.drawChars("N".toCharArray(), 0, 1, 60+100+(int)(100*Math.sin((relative)/(180.0/Math.PI))), 
-					120+100-(int)(100*Math.cos((relative)/(180.0/Math.PI))));
-			g.drawChars("E".toCharArray(), 0, 1, 60+100+(int)(100*Math.sin((relative+90)/(180.0/Math.PI))), 
-					120+100-(int)(100*Math.cos((relative+90)/(180.0/Math.PI))));
-			g.drawChars("S".toCharArray(), 0, 1, 60+100+(int)(100*Math.sin((relative+180)/(180.0/Math.PI))), 
-					120+100-(int)(100*Math.cos((relative+180)/(180.0/Math.PI))));
-			g.drawChars("W".toCharArray(), 0, 1, 60+100+(int)(100*Math.sin((relative+270)/(180.0/Math.PI))), 
-					120+100-(int)(100*Math.cos((relative+270)/(180.0/Math.PI))));
+			g.drawChars("N".toCharArray(), 0, 1, 30+100+(int)(110*Math.sin((relative)/(180.0/Math.PI))), 
+					120+100-(int)(110*Math.cos((relative)/(180.0/Math.PI))));
+			g.drawChars("E".toCharArray(), 0, 1, 30+100+(int)(110*Math.sin((relative+90)/(180.0/Math.PI))), 
+					120+100-(int)(110*Math.cos((relative+90)/(180.0/Math.PI))));
+			g.drawChars("S".toCharArray(), 0, 1, 30+100+(int)(110*Math.sin((relative+180)/(180.0/Math.PI))), 
+					120+100-(int)(110*Math.cos((relative+180)/(180.0/Math.PI))));
+			g.drawChars("W".toCharArray(), 0, 1, 30+100+(int)(110*Math.sin((relative+270)/(180.0/Math.PI))), 
+					120+100-(int)(110*Math.cos((relative+270)/(180.0/Math.PI))));
 			if (!isCourseSet) {
 				g.setColor(Color.RED);
 			} else {
 				g.setColor(Color.GREEN);
 			}
-			g.drawLine(60+100, 120+100, 
-					60+100+(int)(100*Math.sin((relative+coursebearing)/(180.0/Math.PI))), 
+			g.drawLine(30+100, 120+100, 
+					30+100+(int)(100*Math.sin((relative+coursebearing)/(180.0/Math.PI))), 
 					120+100-(int)(100*Math.cos((relative+coursebearing)/(180.0/Math.PI))));
 
 		}
@@ -50,11 +50,11 @@ public class Navigation {
 		// Creating the JFrame for the application
 		JFrame frame = new JFrame("Navigation");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setSize(500, 550);
+		frame.setSize(450, 550);
 
 
 		compass.setBorder(BorderFactory.createEmptyBorder(50, 50, 50, 50)); // Add some padding
-		compass.setSize(300, 300); // Setting size here won't have any effect in this layout
+		compass.setSize(250, 300); // Setting size here won't have any effect in this layout
 
 		frame.add(compass, BorderLayout.CENTER);
 
@@ -82,13 +82,13 @@ public class Navigation {
 		// Adding the panel to the frame
 		frame.add(panel, BorderLayout.WEST);
 		// Creating the JSlider
-		JSlider rudder = new JSlider(JSlider.HORIZONTAL, -90, 90, 0); // Arguments: orientation, min, max, initial value
+		JSlider rudder = new JSlider(JSlider.HORIZONTAL, -45, 45, 0); // Arguments: orientation, min, max, initial value
 		// Get the current preferred size, double it, and set it back
 		Dimension commonpreferredSize = rudder.getPreferredSize();
 		commonpreferredSize.width *= 2; // Double the width
 		commonpreferredSize.height *= 3; // Double the height
 		rudder.setPreferredSize(commonpreferredSize); // Set the new preferred size
-		rudder.setMajorTickSpacing(20); // Set major tick spacing
+		rudder.setMajorTickSpacing(5); // Set major tick spacing
 		rudder.setMinorTickSpacing(1); // Set minor tick spacing
 		rudder.setPaintTicks(true); // Display tick marks
 		rudder.setPaintLabels(true); // Display labels

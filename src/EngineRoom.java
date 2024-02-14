@@ -70,7 +70,7 @@ public class EngineRoom {
 				if (previousSlider != null && !previousSlider.equals(newSlider)) {
 					URL url;
 					try {
-						url = new URL(Constant.PI_HOME + ":8080/engine/left/" + newSlider);
+						url = new URL(Constant.PI_HOME + Constant.PORT + "/engine/left/" + newSlider);
 						Integer result = GenericGet.getGeneric(url);
 					} catch (MalformedURLException e) {
 						e.printStackTrace();
@@ -82,7 +82,7 @@ public class EngineRoom {
 				if (previousRightSlider != null && !previousRightSlider.equals(newRightSlider)) {
 					URL url;
 					try {
-						url = new URL(Constant.PI_HOME + ":8080/engine/right/" + newRightSlider);
+						url = new URL(Constant.PI_HOME + Constant.PORT + "/engine/right/" + newRightSlider);
 						Integer result = GenericGet.getGeneric(url);
 					} catch (MalformedURLException e) {
 						e.printStackTrace();

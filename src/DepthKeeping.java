@@ -2,6 +2,8 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -11,6 +13,10 @@ import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.SwingConstants;
 
+import Const.Constant;
+import GenericGet.GenericGet;
+import pid.PIDControllerAngle;
+
 public class DepthKeeping {
 	public enum EMERGENCY {
 		SCUTTLE, CRASH_DIVE, EMERGENCY_SURFACE, FREEZE
@@ -18,15 +24,17 @@ public class DepthKeeping {
 	private static boolean isDiveAngleSet = false;
 	private static Integer actualAngle = 0;
 	private static Integer requiredAngle = 0;
+	// Creating the JSlider
+	private static JSlider diveDepth = new JSlider(JSlider.VERTICAL, -8000, 0, 0); // Arguments: orientation, min, max, initial value
 	private static JPanel diveAngleGauge = new JPanel() {
 		@Override
 		protected void paintComponent(Graphics g) {
 			super.paintComponent(g);
-			int bearing = DepthKeeping.actualAngle;
+			int angle = DepthKeeping.actualAngle;
 			g.drawArc(10, 120, 200, 200, 0, 360);
 			g.drawLine(10+100, 120+100, 
-					10+100+(int)(100*Math.sin((-bearing+90)/(180.0/Math.PI))), 
-					120+100-(int)(100*Math.cos((-bearing+90)/(180.0/Math.PI))));
+					10+100+(int)(100*Math.sin((-angle+90)/(180.0/Math.PI))), 
+					120+100-(int)(100*Math.cos((-angle+90)/(180.0/Math.PI))));
 			g.drawChars("-90".toCharArray(), 0, 3, 10+100+(int)(100*Math.sin((0)/(180.0/Math.PI))), 
 					120+100-(int)(100*Math.cos((0)/(180.0/Math.PI))));
 			g.drawChars("0".toCharArray(), 0, 1, 10+100+(int)(100*Math.sin((0+90)/(180.0/Math.PI))), 
@@ -53,23 +61,43 @@ public class DepthKeeping {
 	}
 
 	private static void quickControls(DepthKeeping.EMERGENCY action, JSlider diveAngle, JSlider diveDepth) {
+		URL url;
 		switch (action) {
 		//SCUTTLE, CRASH_DIVE, EMERGENCY_SURFACE
 		case SCUTTLE:
 			diveAngle.setValue(-45);
 			diveDepth.setValue(-100000); //100m
+			try {
+				url = new URL(Constant.PI_HOME + Constant.PORT + "/fill-tank/"+true);
+				GenericGet.getGeneric(url);
+			} catch (MalformedURLException e) {
+				e.printStackTrace();
+			}
 			allFull();
 			rudderZero();
 			break;
 		case CRASH_DIVE:
 			diveAngle.setValue(-45);
 			diveDepth.setValue(-8000); //8m
+			try {
+				url = new URL(Constant.PI_HOME + Constant.PORT + "/fill-tank/"+true);
+				GenericGet.getGeneric(url);
+			} catch (MalformedURLException e) {
+				e.printStackTrace();
+			}
+
 			allFull();
 			rudderZero();
 			break; 
 		case EMERGENCY_SURFACE:
 			diveAngle.setValue(45);
 			diveDepth.setValue(0);
+			try {
+				url = new URL(Constant.PI_HOME + Constant.PORT + "/fill-tank/"+false);
+				GenericGet.getGeneric(url);
+			} catch (MalformedURLException e) {
+				e.printStackTrace();
+			}
 			allFull();
 			rudderZero();
 			break; 
@@ -85,23 +113,51 @@ public class DepthKeeping {
 	}
 
 	private static void allFull() {
-		// TODO Auto-generated method stub
-
+		URL url;
+		try {
+			url = new URL(Constant.PI_HOME + Constant.PORT + "/engine/right/" + 100);
+			GenericGet.getGeneric(url);
+			url = new URL(Constant.PI_HOME + Constant.PORT + "/engine/left/" + 100);
+			GenericGet.getGeneric(url);
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private static void rudderZero() {
-		// TODO Auto-generated method stub
+		URL url;
+    	try {
+			url = new URL(Constant.PI_HOME + Constant.PORT + "/navigation/rudder/"+0);
+	    	GenericGet.getGeneric(url);
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 	}
 
 	private static void allStop() {
-		// TODO Auto-generated method stub
-
+		URL url;
+		try {
+			url = new URL(Constant.PI_HOME + Constant.PORT + "/engine/right/" + 0);
+			GenericGet.getGeneric(url);
+			url = new URL(Constant.PI_HOME + Constant.PORT + "/engine/left/" + 0);
+			GenericGet.getGeneric(url);
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private static int getDepth() {
-		// TODO Auto-generated method stub
-		return 8000;
+		URL url;
+		Integer depth = 0;
+		try {
+			url = new URL(Constant.PI_HOME + Constant.PORT + "/depth");
+			depth = GenericGet.getGeneric(url);
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+		return depth;
 	}
 
 	private static void resetButtons(Color original, JButton emergencyLeft, JButton emergencyRight,
@@ -115,10 +171,39 @@ public class DepthKeeping {
 
 	}
 	private class MyThread extends Thread {
-		
+
 		@Override
 		public void run() {
+			PIDControllerAngle pidController = new PIDControllerAngle(0.1, 0.01, 0.05);
+			pidController.setSetpoint(requiredAngle); // Set desired setpoint
+			Integer previousControlOutput = null;
 			while (true) {
+				URL url;
+				try {
+					url = new URL(Constant.PI_HOME + Constant.PORT + "/depth");
+					Integer depth = GenericGet.getGeneric(url);
+					if (requiredAngle < 0 && depth >= -diveDepth.getValue()) {
+						requiredAngle = 0;
+						pidController.setSetpoint(requiredAngle); // Set desired setpoint
+					} else if (requiredAngle > 0 && depth <= -diveDepth.getValue()) {
+						requiredAngle = 0;
+						pidController.setSetpoint(requiredAngle); // Set desired setpoint	
+					}
+					url = new URL(Constant.PI_HOME + Constant.PORT + "/dive/dive-angle");
+					actualAngle = GenericGet.getGeneric(url);
+					double controlOutput = pidController.compute(actualAngle);
+					controlOutput = controlOutput > 45.0 ? 45.0 : controlOutput;
+					controlOutput = controlOutput < -45.0 ? -45.0 : controlOutput;
+					if (previousControlOutput != null && Math.round(controlOutput) != (Integer)previousControlOutput) {
+						url = new URL(Constant.PI_HOME + Constant.PORT + "/dive/front/"+((int)Math.round(controlOutput)));
+						url = new URL(Constant.PI_HOME + Constant.PORT + "/dive/back/"+((int)Math.round(-controlOutput)));
+						Integer result = GenericGet.getGeneric(url);
+					}
+					previousControlOutput = (int)Math.round(controlOutput);
+					diveAngleGauge.repaint();
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
 				try {
 					MyThread.sleep(100);
 				} catch (InterruptedException e) {
@@ -126,7 +211,7 @@ public class DepthKeeping {
 					e.printStackTrace();
 				}
 			}
-			
+
 		}
 	}
 
@@ -163,8 +248,6 @@ public class DepthKeeping {
 
 		// Adding the panel to the frame
 		frame.add(panel, BorderLayout.WEST);
-		// Creating the JSlider
-		JSlider diveDepth = new JSlider(JSlider.VERTICAL, -8000, 0, 0); // Arguments: orientation, min, max, initial value
 		// Get the current preferred size, double it, and set it back
 		Dimension rightpreferredSize = diveDepth.getPreferredSize();
 		rightpreferredSize.width *= 4; // Double the width
@@ -245,10 +328,14 @@ public class DepthKeeping {
 				dive.setBackground(Color.GREEN);
 			}
 			diveAngleGauge.repaint();
-			});
+		});
 
 		// Making the frame visible
 		frame.setVisible(true);
+		DepthKeeping dk = new DepthKeeping();
+		MyThread t = dk.new MyThread();
+		t.start();
+
 	}
 
 }

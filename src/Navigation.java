@@ -75,17 +75,17 @@ public class Navigation {
 			while (true) {
 				URL url;
 				try {
-					url = new URL(Constant.PI_HOME + ":8080/navigation/bearing");
+					url = new URL(Constant.PI_HOME + Constant.PORT + "/navigation/bearing");
 					Navigation.bearing = GenericGet.getGeneric(url);
 		            double controlOutput = pidController.compute(Navigation.bearing);
 		            controlOutput = controlOutput > 45.0 ? 45.0 : controlOutput;
 		            controlOutput = controlOutput < -45.0 ? -45.0 : controlOutput;
 		            if (previousControlOutput != null && Math.round(controlOutput) != (Integer)previousControlOutput) {
-		            	rudder.setValue((int)controlOutput);
-		            	url = new URL(Constant.PI_HOME + ":8080/navigation/rudder/"+((int)controlOutput));
-		            	Integer result = GenericGet.getGeneric(url);
+		            	rudder.setValue((int)Math.round(controlOutput));
+		            	url = new URL(Constant.PI_HOME + Constant.PORT + "/navigation/rudder/"+((int)controlOutput));
+		            	GenericGet.getGeneric(url);
 		            }
-	            	previousControlOutput = (int)controlOutput;
+	            	previousControlOutput = (int)Math.round(controlOutput);
 					compass.repaint();
 				} catch (MalformedURLException e) {
 					e.printStackTrace();

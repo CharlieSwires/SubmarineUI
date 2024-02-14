@@ -1,7 +1,9 @@
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -11,26 +13,58 @@ import javax.swing.SwingConstants;
 
 public class DepthKeeping {
 	public enum EMERGENCY {
-		ALL_STOP, FULL_LEFT, FULL_RIGHT, ALL_FULL, ALL_BACK
+		SCUTTLE, CRASH_DIVE, EMERGENCY_SURFACE, FREEZE
 	}
+	private static Integer actualAngle = 0;
+	private static Integer requiredAngle = 0;
+	private static JPanel diveAngleGauge = new JPanel() {
+		@Override
+		protected void paintComponent(Graphics g) {
+			super.paintComponent(g);
+			int bearing = DepthKeeping.actualAngle;
+			g.drawArc(60, 120, 200, 200, 0, 360);
+			g.drawLine(60+100, 120+100, 
+					60+100+(int)(100*Math.sin((-bearing+90)/(180.0/Math.PI))), 
+					120+100-(int)(100*Math.cos((-bearing+90)/(180.0/Math.PI))));
+			g.drawChars("-90".toCharArray(), 0, 3, 60+100+(int)(100*Math.sin((0)/(180.0/Math.PI))), 
+					120+100-(int)(100*Math.cos((0)/(180.0/Math.PI))));
+			g.drawChars("0".toCharArray(), 0, 1, 60+100+(int)(100*Math.sin((0+90)/(180.0/Math.PI))), 
+					120+100-(int)(100*Math.cos((+90)/(180.0/Math.PI))));
+			g.drawChars("+90".toCharArray(), 0, 3, 60+100+(int)(100*Math.sin((+180)/(180.0/Math.PI))), 
+					120+100+10-(int)(100*Math.cos((+180)/(180.0/Math.PI))));
+			g.drawChars(("Actual Depth:"+getDepth()+"    ").toCharArray(), 0, 18, 60+100+(int)(100*Math.sin((+180)/(180.0/Math.PI))), 
+					120+100+30-(int)(100*Math.cos((+180)/(180.0/Math.PI))));
+			
+				g.setColor(Color.GREEN);
+			
+			g.drawLine(60+100, 120+100, 
+					60+100+(int)(100*Math.sin((-requiredAngle+90)/(180.0/Math.PI))), 
+					120+100-(int)(100*Math.cos((-requiredAngle+90)/(180.0/Math.PI))));
+
+		}
+	};
 
 	public static void main(String[] args) {
 		// Creating the JFrame for the application
-		JFrame frame = new JFrame("Engine Room");
+		JFrame frame = new JFrame("Depth Keeping");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setSize(500, 550);
+		diveAngleGauge.setBorder(BorderFactory.createEmptyBorder(50, 50, 50, 50)); // Add some padding
+		diveAngleGauge.setSize(300, 300); // Setting size here won't have any effect in this layout
+
+		frame.add(diveAngleGauge, BorderLayout.CENTER);
 
 		// Creating the JSlider
-		JSlider slider = new JSlider(JSlider.VERTICAL, -100, 100, 0); // Arguments: orientation, min, max, initial value
+		JSlider diveAngle = new JSlider(JSlider.VERTICAL, -45, 45, 0); // Arguments: orientation, min, max, initial value
 		// Get the current preferred size, double it, and set it back
-		Dimension preferredSize = slider.getPreferredSize();
+		Dimension preferredSize = diveAngle.getPreferredSize();
 		preferredSize.width *= 4; // Double the width
 		preferredSize.height *= 2; // Double the height
-		slider.setPreferredSize(preferredSize); // Set the new preferred size
-		slider.setMajorTickSpacing(25); // Set major tick spacing
-		slider.setMinorTickSpacing(1); // Set minor tick spacing
-		slider.setPaintTicks(true); // Display tick marks
-		slider.setPaintLabels(true); // Display labels
+		diveAngle.setPreferredSize(preferredSize); // Set the new preferred size
+		diveAngle.setMajorTickSpacing(5); // Set major tick spacing
+		diveAngle.setMinorTickSpacing(1); // Set minor tick spacing
+		diveAngle.setPaintTicks(true); // Display tick marks
+		diveAngle.setPaintLabels(true); // Display labels
 
 		// Creating a JLabel to display the value of the JSlider
 		JLabel label = new JLabel("0", SwingConstants.CENTER);
@@ -38,42 +72,22 @@ public class DepthKeeping {
 
 		// Creating a JPanel and adding the slider and label to it
 		JPanel panel = new JPanel();
-		panel.add(slider);
+		panel.add(diveAngle);
 		panel.add(label);
 
 		// Adding the panel to the frame
 		frame.add(panel, BorderLayout.WEST);
 		// Creating the JSlider
-		JSlider commonslider = new JSlider(JSlider.VERTICAL, -100, 100, 0); // Arguments: orientation, min, max, initial value
+		JSlider diveDepth = new JSlider(JSlider.VERTICAL, -8000, 0, 0); // Arguments: orientation, min, max, initial value
 		// Get the current preferred size, double it, and set it back
-		Dimension commonpreferredSize = commonslider.getPreferredSize();
-		commonpreferredSize.width *= 4; // Double the width
-		commonpreferredSize.height *= 2; // Double the height
-		commonslider.setPreferredSize(commonpreferredSize); // Set the new preferred size
-		commonslider.setMajorTickSpacing(25); // Set major tick spacing
-		commonslider.setMinorTickSpacing(1); // Set minor tick spacing
-		commonslider.setPaintTicks(true); // Display tick marks
-		commonslider.setPaintLabels(true); // Display labels
-
-		// Creating a JLabel to display the value of the JSlider
-		JLabel commonlabel = new JLabel("0", SwingConstants.CENTER);
-
-		// Creating a JPanel and adding the slider and label to it
-		JPanel commonpanel = new JPanel();
-		commonpanel.add(commonslider);
-		commonpanel.add(commonlabel);
-		frame.add(commonpanel, BorderLayout.CENTER);
-		// Creating the JSlider
-		JSlider rightslider = new JSlider(JSlider.VERTICAL, -100, 100, 0); // Arguments: orientation, min, max, initial value
-		// Get the current preferred size, double it, and set it back
-		Dimension rightpreferredSize = rightslider.getPreferredSize();
+		Dimension rightpreferredSize = diveDepth.getPreferredSize();
 		rightpreferredSize.width *= 4; // Double the width
 		rightpreferredSize.height *= 2; // Double the height
-		rightslider.setPreferredSize(rightpreferredSize); // Set the new preferred size
-		rightslider.setMajorTickSpacing(25); // Set major tick spacing
-		rightslider.setMinorTickSpacing(1); // Set minor tick spacing
-		rightslider.setPaintTicks(true); // Display tick marks
-		rightslider.setPaintLabels(true); // Display labels
+		diveDepth.setPreferredSize(rightpreferredSize); // Set the new preferred size
+		diveDepth.setMajorTickSpacing(1000); // Set major tick spacing
+		diveDepth.setMinorTickSpacing(100); // Set minor tick spacing
+		diveDepth.setPaintTicks(true); // Display tick marks
+		diveDepth.setPaintLabels(true); // Display labels
 
 		// Creating a JLabel to display the value of the JSlider
 		JLabel rightlabel = new JLabel("0", SwingConstants.CENTER);
@@ -81,107 +95,126 @@ public class DepthKeeping {
 
 		// Creating a JPanel and adding the slider and label to it
 		JPanel rightpanel = new JPanel();
-		rightpanel.add(rightslider);
+		rightpanel.add(diveDepth);
 		rightpanel.add(rightlabel);
 
 		// Adding the panel to the frame
 		frame.add(rightpanel, BorderLayout.EAST);
-		JButton emergencyLeft = new JButton("Emergency Left");
-		JLabel leftTitle = new JLabel("LEFT", SwingConstants.LEFT);
-		JLabel middleTitle = new JLabel("COMMON", SwingConstants.CENTER);
-		JLabel rightTitle = new JLabel("RIGHT", SwingConstants.RIGHT);
-		JButton emergencyRight = new JButton("Emergency Right");
+		JButton crashDive = new JButton("Crash Dive");
+		JLabel leftTitle = new JLabel("REQUIRED ANGLE", SwingConstants.LEFT);
+		JLabel middleTitle = new JLabel("ACTUAL ANGLE", SwingConstants.CENTER);
+		JLabel rightTitle = new JLabel("DEPTH", SwingConstants.RIGHT);
+		JButton scuttle = new JButton("Scuttle");
 		JPanel toppanel = new JPanel();
-		toppanel.add(emergencyLeft);
+		toppanel.add(crashDive);
 		toppanel.add(leftTitle);
 		toppanel.add(middleTitle);
 		toppanel.add(rightTitle);
-		toppanel.add(emergencyRight);
+		toppanel.add(scuttle);
 
 		// Adding the panel to the frame
 		frame.add(toppanel, BorderLayout.NORTH);
-		JButton emergencyReverse = new JButton("Emergency Reverse");
-		JButton allFull = new JButton("All Full");
-		JButton allStop = new JButton("All Stop");
+		JButton emergencySurface = new JButton("Emergency Surface");
+		JButton freeze = new JButton("Freeze");
 		JPanel bottompanel = new JPanel();
-		bottompanel.add(emergencyReverse);
-		bottompanel.add(allStop);
-		bottompanel.add(allFull);
+		bottompanel.add(emergencySurface);
+		bottompanel.add(freeze);
 		// Adding the panel to the frame
 		frame.add(bottompanel, BorderLayout.SOUTH);
-		Color original = emergencyLeft.getBackground();
+		Color original = crashDive.getBackground();
 		// Adding a change listener to the slider to update the label when the slider value changes
-		slider.addChangeListener(e -> {
-			resetButtons(original, emergencyLeft, emergencyRight, emergencyReverse,allStop,allFull);
-			label.setText("" + ((JSlider) e.getSource()).getValue());});
+		diveAngle.addChangeListener(e -> {
+			resetButtons(original, crashDive, scuttle, emergencySurface,freeze);
+			label.setText("" + ((JSlider) e.getSource()).getValue());
+		reference( ((JSlider) e.getSource()).getValue());
+		diveAngleGauge.repaint();});
 		// Adding a change listener to the slider to update the label when the slider value changes
-		rightslider.addChangeListener(e -> {
-			resetButtons(original, emergencyLeft, emergencyRight, emergencyReverse,allStop,allFull);
-			rightlabel.setText("" + ((JSlider) e.getSource()).getValue());});
-		// Adding a change listener to the slider to update the label when the slider value changes
-		commonslider.addChangeListener(e -> {
-			resetButtons(original, emergencyLeft, emergencyRight, emergencyReverse,allStop,allFull);
-			commonlabel.setText("" + ((JSlider) e.getSource()).getValue());
-			slider.setValue((int)((JSlider) e.getSource()).getValue());
-			rightslider.setValue((int)((JSlider) e.getSource()).getValue());});
-		emergencyLeft.addActionListener(e -> {
-			resetButtons(original, emergencyLeft, emergencyRight, emergencyReverse,allStop,allFull);
-			quickControls(EMERGENCY.FULL_LEFT, slider, rightslider);
-			emergencyLeft.setBackground(Color.GREEN);});
-		emergencyRight.addActionListener(e -> {
-			resetButtons(original, emergencyLeft, emergencyRight, emergencyReverse,allStop,allFull);
-			quickControls(EMERGENCY.FULL_RIGHT, slider, rightslider);
-			emergencyRight.setBackground(Color.GREEN);});
-		emergencyReverse.addActionListener(e -> {
-			resetButtons(original, emergencyLeft, emergencyRight, emergencyReverse,allStop,allFull);
-			quickControls(EMERGENCY.ALL_BACK, slider, rightslider);
-			emergencyReverse.setBackground(Color.GREEN);});
-		allStop.addActionListener(e -> {
-			resetButtons(original, emergencyLeft, emergencyRight, emergencyReverse,allStop,allFull);
-			quickControls(EMERGENCY.ALL_STOP, slider, rightslider);
-			allStop.setBackground(Color.GREEN);});
-		allFull.addActionListener(e -> {
-			resetButtons(original, emergencyLeft, emergencyRight, emergencyReverse,allStop,allFull);
-			quickControls(EMERGENCY.ALL_FULL, slider, rightslider);
-			allFull.setBackground(Color.GREEN);});
+		diveDepth.addChangeListener(e -> {
+			resetButtons(original, crashDive, scuttle, emergencySurface,freeze);
+			rightlabel.setText("" + ((JSlider) e.getSource()).getValue());
+		diveAngleGauge.repaint();});
+		crashDive.addActionListener(e -> {
+			resetButtons(original, crashDive, scuttle, emergencySurface,freeze);
+			quickControls(EMERGENCY.CRASH_DIVE, diveAngle, diveDepth);
+			crashDive.setBackground(Color.GREEN);});
+		scuttle.addActionListener(e -> {
+			resetButtons(original, crashDive, scuttle, emergencySurface,freeze);
+			quickControls(EMERGENCY.SCUTTLE, diveAngle, diveDepth);
+			scuttle.setBackground(Color.GREEN);});
+		emergencySurface.addActionListener(e -> {
+			resetButtons(original, crashDive, scuttle, emergencySurface,freeze);
+			quickControls(EMERGENCY.EMERGENCY_SURFACE, diveAngle, diveDepth);
+			emergencySurface.setBackground(Color.GREEN);});
+		freeze.addActionListener(e -> {
+			resetButtons(original, crashDive, scuttle, emergencySurface,freeze);
+			quickControls(EMERGENCY.FREEZE, diveAngle, diveDepth);
+			freeze.setBackground(Color.GREEN);});
 
 		// Making the frame visible
 		frame.setVisible(true);
 	}
 
-	private static void quickControls(DepthKeeping.EMERGENCY action, JSlider slider, JSlider rightslider) {
+	private static void reference(int value) {
+requiredAngle = value;		
+	}
+
+	private static void quickControls(DepthKeeping.EMERGENCY action, JSlider diveAngle, JSlider diveDepth) {
 		switch (action) {
-		case ALL_STOP:
-			slider.setValue(0);
-			rightslider.setValue(0);
+		//SCUTTLE, CRASH_DIVE, EMERGENCY_SURFACE
+		case SCUTTLE:
+			diveAngle.setValue(-45);
+			diveDepth.setValue(-100000); //100m
+			allFull();
+			rudderZero();
 			break;
-		case FULL_LEFT:
-			slider.setValue(-100);
-			rightslider.setValue(100);
+		case CRASH_DIVE:
+			diveAngle.setValue(-45);
+			diveDepth.setValue(-8000); //8m
+			allFull();
+			rudderZero();
 			break; 
-		case FULL_RIGHT:
-			slider.setValue(100);
-			rightslider.setValue(-100);
+		case EMERGENCY_SURFACE:
+			diveAngle.setValue(45);
+			diveDepth.setValue(0);
+			allFull();
+			rudderZero();
 			break; 
-		case ALL_FULL:
-			slider.setValue(100);
-			rightslider.setValue(100);
+		case FREEZE:
+			diveAngle.setValue(0);
+			diveDepth.setValue(-getDepth()); //current depth
+			allStop();
+			rudderZero();
 			break; 
-		case ALL_BACK:
-			slider.setValue(-100);
-			rightslider.setValue(-100);
-			break;
 		default:
 			throw new IllegalArgumentException("action out of range!!");
 		}
 	}
 
+	private static void allFull() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private static void rudderZero() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private static void allStop() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private static int getDepth() {
+		// TODO Auto-generated method stub
+		return 8000;
+	}
+
 	private static void resetButtons(Color original, JButton emergencyLeft, JButton emergencyRight,
-			JButton emergencyReverse, JButton allStop, JButton allFull) {
+			JButton emergencyReverse, JButton allStop) {
 		emergencyLeft.setBackground(original);
 		emergencyRight.setBackground(original);
 		emergencyReverse.setBackground(original);
 		allStop.setBackground(original);
-		allFull.setBackground(original);
 	}
 }

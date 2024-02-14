@@ -22,25 +22,25 @@ public class Navigation {
 			super.paintComponent(g);
 			int bearing = Navigation.bearing;
 			int relative = Navigation.relative;
-			g.drawArc(30, 120, 200, 200, 0, 360);
-			g.drawLine(30+100, 120+100, 
-					30+100+(int)(100*Math.sin((relative+bearing)/(180.0/Math.PI))), 
+			g.drawArc(10, 120, 200, 200, 0, 360);
+			g.drawLine(10+100, 120+100, 
+					10+100+(int)(100*Math.sin((relative+bearing)/(180.0/Math.PI))), 
 					120+100-(int)(100*Math.cos((relative+bearing)/(180.0/Math.PI))));
-			g.drawChars("N".toCharArray(), 0, 1, 30+100+(int)(110*Math.sin((relative)/(180.0/Math.PI))), 
+			g.drawChars("N".toCharArray(), 0, 1, 10+100+(int)(110*Math.sin((relative)/(180.0/Math.PI))), 
 					120+100-(int)(110*Math.cos((relative)/(180.0/Math.PI))));
-			g.drawChars("E".toCharArray(), 0, 1, 30+100+(int)(110*Math.sin((relative+90)/(180.0/Math.PI))), 
+			g.drawChars("E".toCharArray(), 0, 1, 10+100+(int)(110*Math.sin((relative+90)/(180.0/Math.PI))), 
 					120+100-(int)(110*Math.cos((relative+90)/(180.0/Math.PI))));
-			g.drawChars("S".toCharArray(), 0, 1, 30+100+(int)(110*Math.sin((relative+180)/(180.0/Math.PI))), 
+			g.drawChars("S".toCharArray(), 0, 1, 10+100+(int)(110*Math.sin((relative+180)/(180.0/Math.PI))), 
 					120+100-(int)(110*Math.cos((relative+180)/(180.0/Math.PI))));
-			g.drawChars("W".toCharArray(), 0, 1, 30+100+(int)(110*Math.sin((relative+270)/(180.0/Math.PI))), 
+			g.drawChars("W".toCharArray(), 0, 1, 10+100+(int)(110*Math.sin((relative+270)/(180.0/Math.PI))), 
 					120+100-(int)(110*Math.cos((relative+270)/(180.0/Math.PI))));
 			if (!isCourseSet) {
 				g.setColor(Color.RED);
 			} else {
 				g.setColor(Color.GREEN);
 			}
-			g.drawLine(30+100, 120+100, 
-					30+100+(int)(100*Math.sin((relative+coursebearing)/(180.0/Math.PI))), 
+			g.drawLine(10+100, 120+100, 
+					10+100+(int)(100*Math.sin((relative+coursebearing)/(180.0/Math.PI))), 
 					120+100-(int)(100*Math.cos((relative+coursebearing)/(180.0/Math.PI))));
 
 		}
@@ -50,7 +50,7 @@ public class Navigation {
 		// Creating the JFrame for the application
 		JFrame frame = new JFrame("Navigation");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setSize(450, 550);
+		frame.setSize(500, 550);
 
 
 		compass.setBorder(BorderFactory.createEmptyBorder(50, 50, 50, 50)); // Add some padding
@@ -71,7 +71,7 @@ public class Navigation {
 		relativeSlider.setPaintLabels(true); // Display labels
 
 		// Creating a JLabel to display the value of the JSlider
-		JLabel label = new JLabel("0", SwingConstants.CENTER);
+		JLabel label = new JLabel("0deg", SwingConstants.CENTER);
 
 
 		// Creating a JPanel and adding the slider and label to it
@@ -94,7 +94,7 @@ public class Navigation {
 		rudder.setPaintLabels(true); // Display labels
 
 		// Creating a JLabel to display the value of the JSlider
-		JLabel commonlabel = new JLabel("0", SwingConstants.CENTER);
+		JLabel commonlabel = new JLabel("0deg", SwingConstants.CENTER);
 
 		// Creating a JPanel and adding the slider and label to it
 		JPanel commonpanel = new JPanel();
@@ -114,7 +114,7 @@ public class Navigation {
 		absoluteHeading.setPaintLabels(true); // Display labels
 
 		// Creating a JLabel to display the value of the JSlider
-		JLabel rightlabel = new JLabel("0", SwingConstants.CENTER);
+		JLabel rightlabel = new JLabel("0deg", SwingConstants.CENTER);
 
 
 		// Creating a JPanel and adding the slider and label to it
@@ -140,13 +140,13 @@ public class Navigation {
 		// Adding a change listener to the slider to update the label when the slider value changes
 		relativeSlider.addChangeListener(e -> {
 			resetButtons(original, setCourse);
-			label.setText("" + ((JSlider) e.getSource()).getValue());
+			label.setText("" + ((JSlider) e.getSource()).getValue()+"deg");
 			reference( ((JSlider) e.getSource()).getValue());
 			compass.repaint();});
 		// Adding a change listener to the slider to update the label when the slider value changes
 		absoluteHeading.addChangeListener(e -> {
 			resetButtons(original, setCourse);
-			rightlabel.setText("" + ((JSlider) e.getSource()).getValue());
+			rightlabel.setText("" + ((JSlider) e.getSource()).getValue()+"deg");
 			course( ((JSlider) e.getSource()).getValue());
 			Navigation.isCourseSet = false;
 			compass.repaint();
@@ -155,7 +155,7 @@ public class Navigation {
 		// Adding a change listener to the slider to update the label when the slider value changes
 		rudder.addChangeListener(e -> {
 			resetButtons(original, setCourse);
-			commonlabel.setText("" + ((JSlider) e.getSource()).getValue());
+			commonlabel.setText("" + ((JSlider) e.getSource()).getValue()+"deg");
 			Navigation.isCourseSet = false;
 			compass.repaint();
 		});

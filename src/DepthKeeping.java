@@ -15,6 +15,7 @@ public class DepthKeeping {
 	public enum EMERGENCY {
 		SCUTTLE, CRASH_DIVE, EMERGENCY_SURFACE, FREEZE
 	}
+	private static boolean isDiveAngleSet = false;
 	private static Integer actualAngle = 0;
 	private static Integer requiredAngle = 0;
 	private static JPanel diveAngleGauge = new JPanel() {
@@ -22,23 +23,26 @@ public class DepthKeeping {
 		protected void paintComponent(Graphics g) {
 			super.paintComponent(g);
 			int bearing = DepthKeeping.actualAngle;
-			g.drawArc(60, 120, 200, 200, 0, 360);
-			g.drawLine(60+100, 120+100, 
-					60+100+(int)(100*Math.sin((-bearing+90)/(180.0/Math.PI))), 
+			g.drawArc(10, 120, 200, 200, 0, 360);
+			g.drawLine(10+100, 120+100, 
+					10+100+(int)(100*Math.sin((-bearing+90)/(180.0/Math.PI))), 
 					120+100-(int)(100*Math.cos((-bearing+90)/(180.0/Math.PI))));
-			g.drawChars("-90".toCharArray(), 0, 3, 60+100+(int)(100*Math.sin((0)/(180.0/Math.PI))), 
+			g.drawChars("-90".toCharArray(), 0, 3, 10+100+(int)(100*Math.sin((0)/(180.0/Math.PI))), 
 					120+100-(int)(100*Math.cos((0)/(180.0/Math.PI))));
-			g.drawChars("0".toCharArray(), 0, 1, 60+100+(int)(100*Math.sin((0+90)/(180.0/Math.PI))), 
+			g.drawChars("0".toCharArray(), 0, 1, 10+100+(int)(100*Math.sin((0+90)/(180.0/Math.PI))), 
 					120+100-(int)(100*Math.cos((+90)/(180.0/Math.PI))));
-			g.drawChars("+90".toCharArray(), 0, 3, 60+100+(int)(100*Math.sin((+180)/(180.0/Math.PI))), 
+			g.drawChars("+90".toCharArray(), 0, 3, 10+100+(int)(100*Math.sin((+180)/(180.0/Math.PI))), 
 					120+100+10-(int)(100*Math.cos((+180)/(180.0/Math.PI))));
-			g.drawChars(("Actual Depth:"+getDepth()+"    ").toCharArray(), 0, 18, 60+100+(int)(100*Math.sin((+180)/(180.0/Math.PI))), 
+			g.drawChars(("Actual Depth:"+getDepth()+"mm    ").toCharArray(), 0, 20, -60+100+(int)(100*Math.sin((+180)/(180.0/Math.PI))), 
 					120+100+30-(int)(100*Math.cos((+180)/(180.0/Math.PI))));
+			if (!isDiveAngleSet) {
+				g.setColor(Color.RED);
+			} else {
+				g.setColor(Color.GREEN);
+			}
 
-			g.setColor(Color.GREEN);
-
-			g.drawLine(60+100, 120+100, 
-					60+100+(int)(100*Math.sin((-requiredAngle+90)/(180.0/Math.PI))), 
+			g.drawLine(10+100, 120+100, 
+					10+100+(int)(100*Math.sin((-requiredAngle+90)/(180.0/Math.PI))), 
 					120+100-(int)(100*Math.cos((-requiredAngle+90)/(180.0/Math.PI))));
 
 		}
@@ -67,7 +71,7 @@ public class DepthKeeping {
 		diveAngle.setPaintLabels(true); // Display labels
 
 		// Creating a JLabel to display the value of the JSlider
-		JLabel label = new JLabel("0", SwingConstants.CENTER);
+		JLabel label = new JLabel("0degrees", SwingConstants.CENTER);
 
 
 		// Creating a JPanel and adding the slider and label to it
@@ -90,7 +94,7 @@ public class DepthKeeping {
 		diveDepth.setPaintLabels(true); // Display labels
 
 		// Creating a JLabel to display the value of the JSlider
-		JLabel rightlabel = new JLabel("0", SwingConstants.CENTER);
+		JLabel rightlabel = new JLabel("0mm", SwingConstants.CENTER);
 
 
 		// Creating a JPanel and adding the slider and label to it
@@ -116,7 +120,9 @@ public class DepthKeeping {
 		frame.add(toppanel, BorderLayout.NORTH);
 		JButton emergencySurface = new JButton("Emergency Surface");
 		JButton freeze = new JButton("Freeze");
+		JButton dive = new JButton("Dive");
 		JPanel bottompanel = new JPanel();
+		bottompanel.add(dive);
 		bottompanel.add(emergencySurface);
 		bottompanel.add(freeze);
 		// Adding the panel to the frame
@@ -124,31 +130,40 @@ public class DepthKeeping {
 		Color original = crashDive.getBackground();
 		// Adding a change listener to the slider to update the label when the slider value changes
 		diveAngle.addChangeListener(e -> {
-			resetButtons(original, crashDive, scuttle, emergencySurface,freeze);
-			label.setText("" + ((JSlider) e.getSource()).getValue());
+			resetButtons(original, crashDive, scuttle, emergencySurface,freeze,dive);
+			label.setText("" + ((JSlider) e.getSource()).getValue()+"degrees");
 			reference( ((JSlider) e.getSource()).getValue());
 			diveAngleGauge.repaint();});
 		// Adding a change listener to the slider to update the label when the slider value changes
 		diveDepth.addChangeListener(e -> {
-			resetButtons(original, crashDive, scuttle, emergencySurface,freeze);
-			rightlabel.setText("" + ((JSlider) e.getSource()).getValue());
+			resetButtons(original, crashDive, scuttle, emergencySurface,freeze,dive);
+			rightlabel.setText("" + (-((JSlider) e.getSource()).getValue())+"mm");
 			diveAngleGauge.repaint();});
 		crashDive.addActionListener(e -> {
-			resetButtons(original, crashDive, scuttle, emergencySurface,freeze);
+			resetButtons(original, crashDive, scuttle, emergencySurface,freeze,dive);
 			quickControls(EMERGENCY.CRASH_DIVE, diveAngle, diveDepth);
 			crashDive.setBackground(Color.GREEN);});
 		scuttle.addActionListener(e -> {
-			resetButtons(original, crashDive, scuttle, emergencySurface,freeze);
+			resetButtons(original, crashDive, scuttle, emergencySurface,freeze,dive);
 			quickControls(EMERGENCY.SCUTTLE, diveAngle, diveDepth);
 			scuttle.setBackground(Color.GREEN);});
 		emergencySurface.addActionListener(e -> {
-			resetButtons(original, crashDive, scuttle, emergencySurface,freeze);
+			resetButtons(original, crashDive, scuttle, emergencySurface,freeze,dive);
 			quickControls(EMERGENCY.EMERGENCY_SURFACE, diveAngle, diveDepth);
 			emergencySurface.setBackground(Color.GREEN);});
 		freeze.addActionListener(e -> {
-			resetButtons(original, crashDive, scuttle, emergencySurface,freeze);
+			resetButtons(original, crashDive, scuttle, emergencySurface,freeze,dive);
 			quickControls(EMERGENCY.FREEZE, diveAngle, diveDepth);
 			freeze.setBackground(Color.GREEN);});
+		dive.addActionListener(e -> {
+			isDiveAngleSet = !isDiveAngleSet;
+			if (!isDiveAngleSet) {
+				dive.setBackground(original);
+			} else {
+				dive.setBackground(Color.GREEN);
+			}
+			diveAngleGauge.repaint();
+			});
 
 		// Making the frame visible
 		frame.setVisible(true);
@@ -211,10 +226,13 @@ public class DepthKeeping {
 	}
 
 	private static void resetButtons(Color original, JButton emergencyLeft, JButton emergencyRight,
-			JButton emergencyReverse, JButton allStop) {
+			JButton emergencyReverse, JButton allStop, JButton dive) {
 		emergencyLeft.setBackground(original);
 		emergencyRight.setBackground(original);
 		emergencyReverse.setBackground(original);
 		allStop.setBackground(original);
+		dive.setBackground(original);
+		isDiveAngleSet = false;
+
 	}
 }

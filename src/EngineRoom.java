@@ -33,7 +33,7 @@ public class EngineRoom {
 		slider.setPaintLabels(true); // Display labels
 
 		// Creating a JLabel to display the value of the JSlider
-		JLabel label = new JLabel("0", SwingConstants.CENTER);
+		JLabel label = new JLabel("0%", SwingConstants.CENTER);
 
 
 		// Creating a JPanel and adding the slider and label to it
@@ -56,7 +56,7 @@ public class EngineRoom {
 		commonslider.setPaintLabels(true); // Display labels
 
 		// Creating a JLabel to display the value of the JSlider
-		JLabel commonlabel = new JLabel("0", SwingConstants.CENTER);
+		JLabel commonlabel = new JLabel("0%", SwingConstants.CENTER);
 
 		// Creating a JPanel and adding the slider and label to it
 		JPanel commonpanel = new JPanel();
@@ -76,7 +76,7 @@ public class EngineRoom {
 		rightslider.setPaintLabels(true); // Display labels
 
 		// Creating a JLabel to display the value of the JSlider
-		JLabel rightlabel = new JLabel("0", SwingConstants.CENTER);
+		JLabel rightlabel = new JLabel("0%", SwingConstants.CENTER);
 
 
 		// Creating a JPanel and adding the slider and label to it
@@ -113,15 +113,15 @@ public class EngineRoom {
 		// Adding a change listener to the slider to update the label when the slider value changes
 		slider.addChangeListener(e -> {
 			resetButtons(original, emergencyLeft, emergencyRight, emergencyReverse,allStop,allFull);
-			label.setText("" + ((JSlider) e.getSource()).getValue());});
+			label.setText("" + ((JSlider) e.getSource()).getValue()+"%");});
 		// Adding a change listener to the slider to update the label when the slider value changes
 		rightslider.addChangeListener(e -> {
 			resetButtons(original, emergencyLeft, emergencyRight, emergencyReverse,allStop,allFull);
-			rightlabel.setText("" + ((JSlider) e.getSource()).getValue());});
+			rightlabel.setText("" + ((JSlider) e.getSource()).getValue()+"%");});
 		// Adding a change listener to the slider to update the label when the slider value changes
 		commonslider.addChangeListener(e -> {
 			resetButtons(original, emergencyLeft, emergencyRight, emergencyReverse,allStop,allFull);
-			commonlabel.setText("" + ((JSlider) e.getSource()).getValue());
+			commonlabel.setText("" + ((JSlider) e.getSource()).getValue()+"%");
 			slider.setValue((int)((JSlider) e.getSource()).getValue());
 			rightslider.setValue((int)((JSlider) e.getSource()).getValue());});
 		emergencyLeft.addActionListener(e -> {

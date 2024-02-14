@@ -72,22 +72,24 @@ public class EngineRoom {
 					try {
 						url = new URL(Constant.PI_HOME + ":8080/engine/left/" + newSlider);
 						Integer result = GenericGet.getGeneric(url);
-						previousSlider = newSlider;
 					} catch (MalformedURLException e) {
 						e.printStackTrace();
 					}
 				}
+				previousSlider = newSlider;
+
 				newSlider = slider.getValue();
 				if (previousRightSlider != null && !previousRightSlider.equals(newRightSlider)) {
 					URL url;
 					try {
 						url = new URL(Constant.PI_HOME + ":8080/engine/right/" + newRightSlider);
 						Integer result = GenericGet.getGeneric(url);
-						previousRightSlider = newRightSlider;
 					} catch (MalformedURLException e) {
 						e.printStackTrace();
 					}
 				}
+				previousRightSlider = newRightSlider;
+
 				newRightSlider = rightslider.getValue();
 				//10Hz
 				try {

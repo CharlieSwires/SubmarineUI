@@ -9,40 +9,42 @@ import java.net.URL;
 public class GenericGet {
 
 	public static Integer getGeneric(URL url) {
-		Integer rvalue = null;
-
-		try {
-
-			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-			conn.setRequestMethod("GET");
-			conn.setRequestProperty("Accept", "application/json");
-
-			if (conn.getResponseCode() != 200) {
-				throw new RuntimeException("Failed : HTTP error code : "
-						+ conn.getResponseCode());
-			}
-
-			BufferedReader br = new BufferedReader(new InputStreamReader(
-					(conn.getInputStream())));
-
-			String output;
-			StringBuffer inString = new StringBuffer();
-
-			while ((output = br.readLine()) != null) {
-				inString.append(output);
-			}
-			//JSON from String to Object
-			rvalue = Integer.parseInt(inString.toString());
-
-			conn.disconnect();
-			return rvalue;
-
-		} catch (IOException e) {
-
-			e.printStackTrace();
-
-		}
-		return rvalue;
+		System.out.println(url);
+		return (int)(Math.random()*100);
+//		Integer rvalue = null;
+//
+//		try {
+//
+//			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+//			conn.setRequestMethod("GET");
+//			conn.setRequestProperty("Accept", "application/json");
+//
+//			if (conn.getResponseCode() != 200) {
+//				throw new RuntimeException("Failed : HTTP error code : "
+//						+ conn.getResponseCode());
+//			}
+//
+//			BufferedReader br = new BufferedReader(new InputStreamReader(
+//					(conn.getInputStream())));
+//
+//			String output;
+//			StringBuffer inString = new StringBuffer();
+//
+//			while ((output = br.readLine()) != null) {
+//				inString.append(output);
+//			}
+//			//JSON from String to Object
+//			rvalue = Integer.parseInt(inString.toString());
+//
+//			conn.disconnect();
+//			return rvalue;
+//
+//		} catch (IOException e) {
+//
+//			e.printStackTrace();
+//
+//		}
+//		return rvalue;
 
 	}
 

@@ -1,6 +1,6 @@
 package pid;
 
-public class PIDController {
+public class PIDControllerAngle {
     private double kp; // Proportional gain
     private double ki; // Integral gain
     private double kd; // Derivative gain
@@ -8,7 +8,7 @@ public class PIDController {
     private double integral = 0; // Integral accumulator
     private double prevError = 0; // Previous error
 
-    public PIDController(double kp, double ki, double kd) {
+    public PIDControllerAngle(double kp, double ki, double kd) {
         this.kp = kp;
         this.ki = ki;
         this.kd = kd;
@@ -25,7 +25,14 @@ public class PIDController {
     }
 
     public double compute(double processVariable) {
-        double error = setpoint - processVariable;
+    	boolean isReversed = false;
+        double error;
+        error= setpoint - processVariable;
+        if (Math.abs(error) > 180.0) {
+            error=  processVariable - setpoint;
+            isReversed = true;
+        }
+        
         integral += error;
         double derivative = error - prevError;
 
@@ -35,11 +42,11 @@ public class PIDController {
         // Update previous error for next iteration
         prevError = error;
 
-        return output;
+        return !isReversed ? output : -output;
     }
 
     public static void main(String[] args) {
-        PIDController pidController = new PIDController(0.1, 0.01, 0.05);
+        PIDControllerAngle pidController = new PIDControllerAngle(0.1, 0.01, 0.05);
         pidController.setSetpoint(50); // Set desired setpoint
 
         // Simulate the process loop

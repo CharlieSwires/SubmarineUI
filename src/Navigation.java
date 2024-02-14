@@ -15,7 +15,7 @@ import javax.swing.SwingConstants;
 
 import Const.Constant;
 import GenericGet.GenericGet;
-import pid.PIDController;
+import pid.PIDControllerAngle;
 
 public class Navigation {
 	private static boolean isCourseSet = false;
@@ -69,7 +69,7 @@ public class Navigation {
 		
 		@Override
 		public void run() {
-	        PIDController pidController = new PIDController(0.1, 0.01, 0.05);
+	        PIDControllerAngle pidController = new PIDControllerAngle(0.1, 0.01, 0.05);
 	        //TODO inverse dot product so that it goes the nearest way not left if neg right if not
 	        pidController.setSetpoint(coursebearing); // Set desired setpoint
 	        Integer previousControlOutput = null;
@@ -81,12 +81,12 @@ public class Navigation {
 		            double controlOutput = pidController.compute(Navigation.bearing);
 		            controlOutput = controlOutput > 45.0 ? 45.0 : controlOutput;
 		            controlOutput = controlOutput < -45.0 ? -45.0 : controlOutput;
-		            if (previousControlOutput != null && (int)controlOutput != (int)previousControlOutput) {
+		            if (previousControlOutput != null && Math.round(controlOutput) != (Integer)previousControlOutput) {
 		            	rudder.setValue((int)controlOutput);
 		            	url = new URL(Constant.PI_HOME + ":8080/navigation/rudder/"+((int)controlOutput));
 		            	Integer result = GenericGet.getGeneric(url);
-		            	previousControlOutput = (int)controlOutput;
 		            }
+	            	previousControlOutput = (int)controlOutput;
 					compass.repaint();
 				} catch (MalformedURLException e) {
 					e.printStackTrace();

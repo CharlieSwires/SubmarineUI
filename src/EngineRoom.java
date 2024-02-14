@@ -1,6 +1,8 @@
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -9,9 +11,94 @@ import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.SwingConstants;
 
+import Const.Constant;
+import GenericGet.GenericGet;
+
 public class EngineRoom {
 	public enum EMERGENCY {
 		ALL_STOP, FULL_LEFT, FULL_RIGHT, ALL_FULL, ALL_BACK
+	}
+	// Creating the JSlider
+	private static JSlider slider = new JSlider(JSlider.VERTICAL, -100, 100, 0); // Arguments: orientation, min, max, initial value
+	// Creating the JSlider
+	private static JSlider rightslider = new JSlider(JSlider.VERTICAL, -100, 100, 0); // Arguments: orientation, min, max, initial value
+
+	private static void quickControls(EngineRoom.EMERGENCY action, JSlider slider, JSlider rightslider) {
+		switch (action) {
+		case ALL_STOP:
+			slider.setValue(0);
+			rightslider.setValue(0);
+			break;
+		case FULL_LEFT:
+			slider.setValue(-100);
+			rightslider.setValue(100);
+			break; 
+		case FULL_RIGHT:
+			slider.setValue(100);
+			rightslider.setValue(-100);
+			break; 
+		case ALL_FULL:
+			slider.setValue(100);
+			rightslider.setValue(100);
+			break; 
+		case ALL_BACK:
+			slider.setValue(-100);
+			rightslider.setValue(-100);
+			break;
+		default:
+			throw new IllegalArgumentException("action out of range!!");
+		}
+	}
+
+	private static void resetButtons(Color original, JButton emergencyLeft, JButton emergencyRight,
+			JButton emergencyReverse, JButton allStop, JButton allFull) {
+		emergencyLeft.setBackground(original);
+		emergencyRight.setBackground(original);
+		emergencyReverse.setBackground(original);
+		allStop.setBackground(original);
+		allFull.setBackground(original);
+	}
+	private class MyThread extends Thread {
+		Integer newSlider = slider.getValue();
+		Integer previousSlider = null;
+		Integer newRightSlider = rightslider.getValue();
+		Integer previousRightSlider = null;
+		@Override
+		public void run() {
+			while (true) {
+				//only when changed
+				if (previousSlider != null && !previousSlider.equals(newSlider)) {
+					URL url;
+					try {
+						url = new URL(Constant.PI_HOME + ":8080/engine/left/" + newSlider);
+						Integer result = GenericGet.getGeneric(url);
+						previousSlider = newSlider;
+					} catch (MalformedURLException e) {
+						e.printStackTrace();
+					}
+				}
+				newSlider = slider.getValue();
+				if (previousRightSlider != null && !previousRightSlider.equals(newRightSlider)) {
+					URL url;
+					try {
+						url = new URL(Constant.PI_HOME + ":8080/engine/right/" + newRightSlider);
+						Integer result = GenericGet.getGeneric(url);
+						previousRightSlider = newRightSlider;
+					} catch (MalformedURLException e) {
+						e.printStackTrace();
+					}
+				}
+				newRightSlider = rightslider.getValue();
+				//10Hz
+				try {
+					MyThread.sleep(100);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			
+		}
 	}
 
 	public static void main(String[] args) {
@@ -20,8 +107,6 @@ public class EngineRoom {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setSize(500, 550);
 
-		// Creating the JSlider
-		JSlider slider = new JSlider(JSlider.VERTICAL, -100, 100, 0); // Arguments: orientation, min, max, initial value
 		// Get the current preferred size, double it, and set it back
 		Dimension preferredSize = slider.getPreferredSize();
 		preferredSize.width *= 4; // Double the width
@@ -63,8 +148,6 @@ public class EngineRoom {
 		commonpanel.add(commonslider);
 		commonpanel.add(commonlabel);
 		frame.add(commonpanel, BorderLayout.CENTER);
-		// Creating the JSlider
-		JSlider rightslider = new JSlider(JSlider.VERTICAL, -100, 100, 0); // Arguments: orientation, min, max, initial value
 		// Get the current preferred size, double it, and set it back
 		Dimension rightpreferredSize = rightslider.getPreferredSize();
 		rightpreferredSize.width *= 4; // Double the width
@@ -147,41 +230,9 @@ public class EngineRoom {
 
 		// Making the frame visible
 		frame.setVisible(true);
+		EngineRoom er = new EngineRoom();
+		MyThread t = er.new MyThread();
+		t.start();
 	}
 
-	private static void quickControls(EngineRoom.EMERGENCY action, JSlider slider, JSlider rightslider) {
-		switch (action) {
-		case ALL_STOP:
-			slider.setValue(0);
-			rightslider.setValue(0);
-			break;
-		case FULL_LEFT:
-			slider.setValue(-100);
-			rightslider.setValue(100);
-			break; 
-		case FULL_RIGHT:
-			slider.setValue(100);
-			rightslider.setValue(-100);
-			break; 
-		case ALL_FULL:
-			slider.setValue(100);
-			rightslider.setValue(100);
-			break; 
-		case ALL_BACK:
-			slider.setValue(-100);
-			rightslider.setValue(-100);
-			break;
-		default:
-			throw new IllegalArgumentException("action out of range!!");
-		}
-	}
-
-	private static void resetButtons(Color original, JButton emergencyLeft, JButton emergencyRight,
-			JButton emergencyReverse, JButton allStop, JButton allFull) {
-		emergencyLeft.setBackground(original);
-		emergencyRight.setBackground(original);
-		emergencyReverse.setBackground(original);
-		allStop.setBackground(original);
-		allFull.setBackground(original);
-	}
 }

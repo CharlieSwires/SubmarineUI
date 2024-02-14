@@ -48,6 +48,88 @@ public class DepthKeeping {
 		}
 	};
 
+	private static void reference(int value) {
+		requiredAngle = value;		
+	}
+
+	private static void quickControls(DepthKeeping.EMERGENCY action, JSlider diveAngle, JSlider diveDepth) {
+		switch (action) {
+		//SCUTTLE, CRASH_DIVE, EMERGENCY_SURFACE
+		case SCUTTLE:
+			diveAngle.setValue(-45);
+			diveDepth.setValue(-100000); //100m
+			allFull();
+			rudderZero();
+			break;
+		case CRASH_DIVE:
+			diveAngle.setValue(-45);
+			diveDepth.setValue(-8000); //8m
+			allFull();
+			rudderZero();
+			break; 
+		case EMERGENCY_SURFACE:
+			diveAngle.setValue(45);
+			diveDepth.setValue(0);
+			allFull();
+			rudderZero();
+			break; 
+		case FREEZE:
+			diveAngle.setValue(0);
+			diveDepth.setValue(-getDepth()); //current depth
+			allStop();
+			rudderZero();
+			break; 
+		default:
+			throw new IllegalArgumentException("action out of range!!");
+		}
+	}
+
+	private static void allFull() {
+		// TODO Auto-generated method stub
+
+	}
+
+	private static void rudderZero() {
+		// TODO Auto-generated method stub
+
+	}
+
+	private static void allStop() {
+		// TODO Auto-generated method stub
+
+	}
+
+	private static int getDepth() {
+		// TODO Auto-generated method stub
+		return 8000;
+	}
+
+	private static void resetButtons(Color original, JButton emergencyLeft, JButton emergencyRight,
+			JButton emergencyReverse, JButton allStop, JButton dive) {
+		emergencyLeft.setBackground(original);
+		emergencyRight.setBackground(original);
+		emergencyReverse.setBackground(original);
+		allStop.setBackground(original);
+		dive.setBackground(original);
+		isDiveAngleSet = false;
+
+	}
+	private class MyThread extends Thread {
+		
+		@Override
+		public void run() {
+			while (true) {
+				try {
+					MyThread.sleep(100);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			
+		}
+	}
+
 	public static void main(String[] args) {
 		// Creating the JFrame for the application
 		JFrame frame = new JFrame("Depth Keeping");
@@ -169,70 +251,4 @@ public class DepthKeeping {
 		frame.setVisible(true);
 	}
 
-	private static void reference(int value) {
-		requiredAngle = value;		
-	}
-
-	private static void quickControls(DepthKeeping.EMERGENCY action, JSlider diveAngle, JSlider diveDepth) {
-		switch (action) {
-		//SCUTTLE, CRASH_DIVE, EMERGENCY_SURFACE
-		case SCUTTLE:
-			diveAngle.setValue(-45);
-			diveDepth.setValue(-100000); //100m
-			allFull();
-			rudderZero();
-			break;
-		case CRASH_DIVE:
-			diveAngle.setValue(-45);
-			diveDepth.setValue(-8000); //8m
-			allFull();
-			rudderZero();
-			break; 
-		case EMERGENCY_SURFACE:
-			diveAngle.setValue(45);
-			diveDepth.setValue(0);
-			allFull();
-			rudderZero();
-			break; 
-		case FREEZE:
-			diveAngle.setValue(0);
-			diveDepth.setValue(-getDepth()); //current depth
-			allStop();
-			rudderZero();
-			break; 
-		default:
-			throw new IllegalArgumentException("action out of range!!");
-		}
-	}
-
-	private static void allFull() {
-		// TODO Auto-generated method stub
-
-	}
-
-	private static void rudderZero() {
-		// TODO Auto-generated method stub
-
-	}
-
-	private static void allStop() {
-		// TODO Auto-generated method stub
-
-	}
-
-	private static int getDepth() {
-		// TODO Auto-generated method stub
-		return 8000;
-	}
-
-	private static void resetButtons(Color original, JButton emergencyLeft, JButton emergencyRight,
-			JButton emergencyReverse, JButton allStop, JButton dive) {
-		emergencyLeft.setBackground(original);
-		emergencyRight.setBackground(original);
-		emergencyReverse.setBackground(original);
-		allStop.setBackground(original);
-		dive.setBackground(original);
-		isDiveAngleSet = false;
-
-	}
 }

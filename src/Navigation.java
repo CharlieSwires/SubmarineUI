@@ -2,6 +2,8 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -11,11 +13,17 @@ import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.SwingConstants;
 
+import Const.Constant;
+import GenericGet.GenericGet;
+import pid.PIDController;
+
 public class Navigation {
 	private static boolean isCourseSet = false;
 	private static Integer relative = 0;
 	private static Integer bearing = -20;
 	private static Integer coursebearing = 0;
+	// Creating the JSlider
+	private static JSlider rudder = new JSlider(JSlider.HORIZONTAL, -45, 45, 0); // Arguments: orientation, min, max, initial value
 	private static JPanel compass = new JPanel() {
 		@Override
 		protected void paintComponent(Graphics g) {
@@ -45,7 +53,53 @@ public class Navigation {
 
 		}
 	};
+	private static void course(int value) {
+		Navigation.coursebearing = value;
 
+	}
+
+	private static void reference(int value) {
+		Navigation.relative = value;
+	}
+
+	private static void resetButtons(Color original, JButton setCourse) {
+		setCourse.setBackground(original);
+	}
+	private class MyThread extends Thread {
+		
+		@Override
+		public void run() {
+	        PIDController pidController = new PIDController(0.1, 0.01, 0.05);
+	        pidController.setSetpoint(coursebearing); // Set desired setpoint
+	        Integer previousControlOutput = null;
+			while (true) {
+				URL url;
+				try {
+					url = new URL(Constant.PI_HOME + ":8080/navigation/bearing");
+					Navigation.bearing = GenericGet.getGeneric(url);
+		            double controlOutput = pidController.compute(Navigation.bearing);
+		            controlOutput = controlOutput > 45.0 ? 45.0 : controlOutput;
+		            controlOutput = controlOutput < -45.0 ? -45.0 : controlOutput;
+		            if (previousControlOutput != null && (int)controlOutput != (int)previousControlOutput) {
+		            	rudder.setValue((int)controlOutput);
+		            	url = new URL(Constant.PI_HOME + ":8080/navigation/rudder/"+((int)controlOutput));
+		            	Integer result = GenericGet.getGeneric(url);
+		            	previousControlOutput = (int)controlOutput;
+		            }
+					compass.repaint();
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+				try {
+					MyThread.sleep(100);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			
+		}
+	}
 	public static void main(String[] args) {
 		// Creating the JFrame for the application
 		JFrame frame = new JFrame("Navigation");
@@ -81,8 +135,6 @@ public class Navigation {
 
 		// Adding the panel to the frame
 		frame.add(panel, BorderLayout.WEST);
-		// Creating the JSlider
-		JSlider rudder = new JSlider(JSlider.HORIZONTAL, -45, 45, 0); // Arguments: orientation, min, max, initial value
 		// Get the current preferred size, double it, and set it back
 		Dimension commonpreferredSize = rudder.getPreferredSize();
 		commonpreferredSize.width *= 2; // Double the width
@@ -168,18 +220,11 @@ public class Navigation {
 
 		// Making the frame visible
 		frame.setVisible(true);
+		Navigation n = new Navigation();
+		MyThread t = n.new MyThread();
+		t.start();
+
 	}
 
-	private static void course(int value) {
-		Navigation.coursebearing = value;
 
-	}
-
-	private static void reference(int value) {
-		Navigation.relative = value;
-	}
-
-	private static void resetButtons(Color original, JButton setCourse) {
-		setCourse.setBackground(original);
-	}
 }

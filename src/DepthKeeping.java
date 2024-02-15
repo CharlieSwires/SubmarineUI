@@ -19,9 +19,11 @@ import pid.PIDControllerAngle;
 
 public class DepthKeeping {
 	public enum EMERGENCY {
-		SCUTTLE, CRASH_DIVE, EMERGENCY_SURFACE, FREEZE
+		SCUTTLE, CRASH_DIVE, EMERGENCY_SURFACE, FREEZE, ALTER_DEPTH, DIVE
 	}
 	private static boolean isDiveAngleSet = false;
+	private static boolean isAlterDepthAngleSet = false;
+	private static boolean success =true;
 	private static Integer actualAngle = 0;
 	private static Integer requiredAngle = 0;
 	// Creating the JSlider
@@ -43,6 +45,16 @@ public class DepthKeeping {
 					120+100+10-(int)(100*Math.cos((+180)/(180.0/Math.PI))));
 			g.drawChars(("Actual Depth:"+getDepth()+"mm    ").toCharArray(), 0, 20, -60+100+(int)(100*Math.sin((+180)/(180.0/Math.PI))), 
 					120+100+30-(int)(100*Math.cos((+180)/(180.0/Math.PI))));
+			if (success == false) {
+				g.setColor(Color.RED);
+				g.drawChars(("ERROR"+"     ").toCharArray(), 0, 10, -60+100+(int)(100*Math.sin((+180)/(180.0/Math.PI))), 
+						140+100+30-(int)(100*Math.cos((+180)/(180.0/Math.PI))));
+				
+			} else {
+				g.setColor(Color.GREEN);
+				g.drawChars(("SUCCESS"+"     ").toCharArray(), 0, 10, -60+100+(int)(100*Math.sin((+180)/(180.0/Math.PI))), 
+						140+100+30-(int)(100*Math.cos((+180)/(180.0/Math.PI))));
+			}
 			if (!isDiveAngleSet) {
 				g.setColor(Color.RED);
 			} else {
@@ -60,15 +72,16 @@ public class DepthKeeping {
 		requiredAngle = value;		
 	}
 
-	private static void quickControls(DepthKeeping.EMERGENCY action, JSlider diveAngle, JSlider diveDepth) {
+	private static Boolean quickControls(DepthKeeping.EMERGENCY action, JSlider diveAngle, JSlider diveDepth) {
 		URL url;
+		Boolean success = true;
 		switch (action) {
 		//SCUTTLE, CRASH_DIVE, EMERGENCY_SURFACE
 		case SCUTTLE:
 			diveAngle.setValue(-45);
 			diveDepth.setValue(-100000); //100m
 			try {
-				url = new URL(Constant.PI_HOME + Constant.PORT + "/fill-tank/"+true);
+				url = new URL(Constant.PI_HOME + Constant.PORT + "/fill-tank/true");
 				GenericGet.getGeneric(url);
 			} catch (MalformedURLException e) {
 				e.printStackTrace();
@@ -80,7 +93,7 @@ public class DepthKeeping {
 			diveAngle.setValue(-45);
 			diveDepth.setValue(-8000); //8m
 			try {
-				url = new URL(Constant.PI_HOME + Constant.PORT + "/fill-tank/"+true);
+				url = new URL(Constant.PI_HOME + Constant.PORT + "/fill-tank/true");
 				GenericGet.getGeneric(url);
 			} catch (MalformedURLException e) {
 				e.printStackTrace();
@@ -93,7 +106,7 @@ public class DepthKeeping {
 			diveAngle.setValue(45);
 			diveDepth.setValue(0);
 			try {
-				url = new URL(Constant.PI_HOME + Constant.PORT + "/fill-tank/"+false);
+				url = new URL(Constant.PI_HOME + Constant.PORT + "/fill-tank/false");
 				GenericGet.getGeneric(url);
 			} catch (MalformedURLException e) {
 				e.printStackTrace();
@@ -107,9 +120,31 @@ public class DepthKeeping {
 			allStop();
 			rudderZero();
 			break; 
+		case ALTER_DEPTH:
+			if ((diveDepth.getValue() < -getDepth() && diveAngle.getValue() > 0) ||
+					(diveDepth.getValue() > -getDepth() && diveAngle.getValue() < 0)) {
+				rudderZero();				
+			} else {
+				success = false;
+			}
+			break; 
+		case DIVE:
+			if (diveDepth.getValue() > -getDepth() && diveAngle.getValue() < 0) {
+				try {
+					url = new URL(Constant.PI_HOME + Constant.PORT + "/fill-tank/true");
+					GenericGet.getGeneric(url);
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+				rudderZero();
+			} else {
+				success = false;
+			}
+			break; 
 		default:
 			throw new IllegalArgumentException("action out of range!!");
 		}
+		return success;
 	}
 
 	private static void allFull() {
@@ -126,9 +161,9 @@ public class DepthKeeping {
 
 	private static void rudderZero() {
 		URL url;
-    	try {
+		try {
 			url = new URL(Constant.PI_HOME + Constant.PORT + "/navigation/rudder/"+0);
-	    	GenericGet.getGeneric(url);
+			GenericGet.getGeneric(url);
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -161,13 +196,15 @@ public class DepthKeeping {
 	}
 
 	private static void resetButtons(Color original, JButton emergencyLeft, JButton emergencyRight,
-			JButton emergencyReverse, JButton allStop, JButton dive) {
+			JButton emergencyReverse, JButton allStop, JButton dive, JButton alterDepth) {
 		emergencyLeft.setBackground(original);
 		emergencyRight.setBackground(original);
 		emergencyReverse.setBackground(original);
 		allStop.setBackground(original);
 		dive.setBackground(original);
-		isDiveAngleSet = false;
+		alterDepth.setBackground(original);
+//		isDiveAngleSet = false;
+//		isAlterDepthAngleSet = false;
 
 	}
 	private class MyThread extends Thread {
@@ -286,8 +323,10 @@ public class DepthKeeping {
 		JButton emergencySurface = new JButton("Emergency Surface");
 		JButton freeze = new JButton("Freeze");
 		JButton dive = new JButton("Dive");
+		JButton alterDepth = new JButton("Alter Depth");
 		JPanel bottompanel = new JPanel();
 		bottompanel.add(dive);
+		bottompanel.add(alterDepth);
 		bottompanel.add(emergencySurface);
 		bottompanel.add(freeze);
 		// Adding the panel to the frame
@@ -295,37 +334,52 @@ public class DepthKeeping {
 		Color original = crashDive.getBackground();
 		// Adding a change listener to the slider to update the label when the slider value changes
 		diveAngle.addChangeListener(e -> {
-			resetButtons(original, crashDive, scuttle, emergencySurface,freeze,dive);
+			resetButtons(original, crashDive, scuttle, emergencySurface,freeze,dive,alterDepth);
 			label.setText("" + ((JSlider) e.getSource()).getValue()+"degrees");
 			reference( ((JSlider) e.getSource()).getValue());
 			diveAngleGauge.repaint();});
 		// Adding a change listener to the slider to update the label when the slider value changes
 		diveDepth.addChangeListener(e -> {
-			resetButtons(original, crashDive, scuttle, emergencySurface,freeze,dive);
+			resetButtons(original, crashDive, scuttle, emergencySurface,freeze,dive,alterDepth);
 			rightlabel.setText("" + (-((JSlider) e.getSource()).getValue())+"mm");
 			diveAngleGauge.repaint();});
 		crashDive.addActionListener(e -> {
-			resetButtons(original, crashDive, scuttle, emergencySurface,freeze,dive);
-			quickControls(EMERGENCY.CRASH_DIVE, diveAngle, diveDepth);
+			resetButtons(original, crashDive, scuttle, emergencySurface,freeze,dive,alterDepth);
+			success = quickControls(EMERGENCY.CRASH_DIVE, diveAngle, diveDepth);
 			crashDive.setBackground(Color.GREEN);});
 		scuttle.addActionListener(e -> {
-			resetButtons(original, crashDive, scuttle, emergencySurface,freeze,dive);
-			quickControls(EMERGENCY.SCUTTLE, diveAngle, diveDepth);
+			resetButtons(original, crashDive, scuttle, emergencySurface,freeze,dive,alterDepth);
+			success = quickControls(EMERGENCY.SCUTTLE, diveAngle, diveDepth);
 			scuttle.setBackground(Color.GREEN);});
 		emergencySurface.addActionListener(e -> {
-			resetButtons(original, crashDive, scuttle, emergencySurface,freeze,dive);
-			quickControls(EMERGENCY.EMERGENCY_SURFACE, diveAngle, diveDepth);
+			resetButtons(original, crashDive, scuttle, emergencySurface,freeze,dive,alterDepth);
+			success = quickControls(EMERGENCY.EMERGENCY_SURFACE, diveAngle, diveDepth);
 			emergencySurface.setBackground(Color.GREEN);});
 		freeze.addActionListener(e -> {
-			resetButtons(original, crashDive, scuttle, emergencySurface,freeze,dive);
-			quickControls(EMERGENCY.FREEZE, diveAngle, diveDepth);
+			resetButtons(original, crashDive, scuttle, emergencySurface,freeze,dive,alterDepth);
+			success = quickControls(EMERGENCY.FREEZE, diveAngle, diveDepth);
 			freeze.setBackground(Color.GREEN);});
 		dive.addActionListener(e -> {
+			resetButtons(original, crashDive, scuttle, emergencySurface,freeze,dive,alterDepth);
 			isDiveAngleSet = !isDiveAngleSet;
 			if (!isDiveAngleSet) {
 				dive.setBackground(original);
+				success = true;
 			} else {
+				success = quickControls(EMERGENCY.DIVE, diveAngle, diveDepth);
 				dive.setBackground(Color.GREEN);
+			}
+			diveAngleGauge.repaint();
+		});
+		alterDepth.addActionListener(e -> {
+			resetButtons(original, crashDive, scuttle, emergencySurface,freeze,dive,alterDepth);
+			isAlterDepthAngleSet = !isAlterDepthAngleSet;
+			if (!isAlterDepthAngleSet) {
+				alterDepth.setBackground(original);
+				success = true;
+			} else {
+				success = quickControls(EMERGENCY.ALTER_DEPTH, diveAngle, diveDepth);
+				alterDepth.setBackground(Color.GREEN);
 			}
 			diveAngleGauge.repaint();
 		});

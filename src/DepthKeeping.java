@@ -203,8 +203,8 @@ public class DepthKeeping {
 		allStop.setBackground(original);
 		dive.setBackground(original);
 		alterDepth.setBackground(original);
-//		isDiveAngleSet = false;
-//		isAlterDepthAngleSet = false;
+		isDiveAngleSet = false;
+		isAlterDepthAngleSet = false;
 
 	}
 	private class MyThread extends Thread {
@@ -360,7 +360,6 @@ public class DepthKeeping {
 			success = quickControls(EMERGENCY.FREEZE, diveAngle, diveDepth);
 			freeze.setBackground(Color.GREEN);});
 		dive.addActionListener(e -> {
-			resetButtons(original, crashDive, scuttle, emergencySurface,freeze,dive,alterDepth);
 			isDiveAngleSet = !isDiveAngleSet;
 			if (!isDiveAngleSet) {
 				dive.setBackground(original);
@@ -372,7 +371,6 @@ public class DepthKeeping {
 			diveAngleGauge.repaint();
 		});
 		alterDepth.addActionListener(e -> {
-			resetButtons(original, crashDive, scuttle, emergencySurface,freeze,dive,alterDepth);
 			isAlterDepthAngleSet = !isAlterDepthAngleSet;
 			if (!isAlterDepthAngleSet) {
 				alterDepth.setBackground(original);

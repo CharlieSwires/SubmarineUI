@@ -26,8 +26,20 @@ public class DepthKeeping {
 	private static boolean success =true;
 	private static Integer actualAngle = 0;
 	private static Integer requiredAngle = 0;
+	private static String error;
+	private static final String COMMS_LOST = "COMMUNICATION LOST";
+	private static final String COMMS_OK = "COMMUNICATION OK";
 	// Creating the JSlider
 	private static JSlider diveDepth = new JSlider(JSlider.VERTICAL, -8000, 0, 0); // Arguments: orientation, min, max, initial value
+	// Creating the JSlider
+	private static JSlider diveAngle = new JSlider(JSlider.VERTICAL, -45, 45, 0); // Arguments: orientation, min, max, initial value
+	private static JButton emergencySurface = new JButton("Emergency Surface");
+	private static JButton crashDive = new JButton("Crash Dive");
+	private static JButton scuttle = new JButton("Scuttle");
+	private static JButton freeze = new JButton("Freeze");
+	private static JButton dive = new JButton("Dive");
+	private static JButton alterDepth = new JButton("Alter Depth");
+	private static Color original = crashDive.getBackground();
 	private static JPanel diveAngleGauge = new JPanel() {
 		@Override
 		protected void paintComponent(Graphics g) {
@@ -55,6 +67,16 @@ public class DepthKeeping {
 				g.drawChars(("SUCCESS"+"     ").toCharArray(), 0, 10, -60+100+(int)(100*Math.sin((+180)/(180.0/Math.PI))), 
 						140+100+30-(int)(100*Math.cos((+180)/(180.0/Math.PI))));
 			}
+			if (error.equals(COMMS_LOST)) {
+				g.setColor(Color.RED);
+				g.drawChars((error+"     ").toCharArray(), 0, 20, -60+100+(int)(100*Math.sin((+180)/(180.0/Math.PI))), 
+						160+100+30-(int)(100*Math.cos((+180)/(180.0/Math.PI))));
+				
+			} else {
+				g.setColor(Color.GREEN);
+				g.drawChars((error+"        ").toCharArray(), 0, 20, -60+100+(int)(100*Math.sin((+180)/(180.0/Math.PI))), 
+						160+100+30-(int)(100*Math.cos((+180)/(180.0/Math.PI))));
+			}
 			if (!isDiveAngleSet) {
 				g.setColor(Color.RED);
 			} else {
@@ -76,7 +98,6 @@ public class DepthKeeping {
 		URL url;
 		Boolean success = true;
 		switch (action) {
-		//SCUTTLE, CRASH_DIVE, EMERGENCY_SURFACE
 		case SCUTTLE:
 			diveAngle.setValue(-45);
 			diveDepth.setValue(-100000); //100m
@@ -189,8 +210,14 @@ public class DepthKeeping {
 		try {
 			url = new URL(Constant.PI_HOME + Constant.PORT + "/depth");
 			depth = GenericGet.getGeneric(url);
+			error = COMMS_OK;
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
+		} catch (RuntimeException e2) { //need something other end, if COMMS_LOST this won't work.
+			error = COMMS_LOST;
+			resetButtons(original, crashDive, scuttle, emergencySurface,freeze,dive,alterDepth);
+			success = quickControls(EMERGENCY.EMERGENCY_SURFACE, diveAngle, diveDepth);
+			emergencySurface.setBackground(Color.GREEN);
 		}
 		return depth;
 	}
@@ -262,8 +289,6 @@ public class DepthKeeping {
 
 		frame.add(diveAngleGauge, BorderLayout.CENTER);
 
-		// Creating the JSlider
-		JSlider diveAngle = new JSlider(JSlider.VERTICAL, -45, 45, 0); // Arguments: orientation, min, max, initial value
 		// Get the current preferred size, double it, and set it back
 		Dimension preferredSize = diveAngle.getPreferredSize();
 		preferredSize.width *= 4; // Double the width
@@ -306,11 +331,9 @@ public class DepthKeeping {
 
 		// Adding the panel to the frame
 		frame.add(rightpanel, BorderLayout.EAST);
-		JButton crashDive = new JButton("Crash Dive");
 		JLabel leftTitle = new JLabel("REQUIRED ANGLE", SwingConstants.LEFT);
 		JLabel middleTitle = new JLabel("ACTUAL ANGLE", SwingConstants.CENTER);
 		JLabel rightTitle = new JLabel("DEPTH", SwingConstants.RIGHT);
-		JButton scuttle = new JButton("Scuttle");
 		JPanel toppanel = new JPanel();
 		toppanel.add(crashDive);
 		toppanel.add(leftTitle);
@@ -320,10 +343,6 @@ public class DepthKeeping {
 
 		// Adding the panel to the frame
 		frame.add(toppanel, BorderLayout.NORTH);
-		JButton emergencySurface = new JButton("Emergency Surface");
-		JButton freeze = new JButton("Freeze");
-		JButton dive = new JButton("Dive");
-		JButton alterDepth = new JButton("Alter Depth");
 		JPanel bottompanel = new JPanel();
 		bottompanel.add(dive);
 		bottompanel.add(alterDepth);
@@ -331,7 +350,6 @@ public class DepthKeeping {
 		bottompanel.add(freeze);
 		// Adding the panel to the frame
 		frame.add(bottompanel, BorderLayout.SOUTH);
-		Color original = crashDive.getBackground();
 		// Adding a change listener to the slider to update the label when the slider value changes
 		diveAngle.addChangeListener(e -> {
 			resetButtons(original, crashDive, scuttle, emergencySurface,freeze,dive,alterDepth);
@@ -365,6 +383,7 @@ public class DepthKeeping {
 				dive.setBackground(original);
 				success = true;
 			} else {
+				resetButtons(original, crashDive, scuttle, emergencySurface,freeze,dive,alterDepth);
 				success = quickControls(EMERGENCY.DIVE, diveAngle, diveDepth);
 				dive.setBackground(Color.GREEN);
 			}
@@ -376,6 +395,7 @@ public class DepthKeeping {
 				alterDepth.setBackground(original);
 				success = true;
 			} else {
+				resetButtons(original, crashDive, scuttle, emergencySurface,freeze,dive,alterDepth);
 				success = quickControls(EMERGENCY.ALTER_DEPTH, diveAngle, diveDepth);
 				alterDepth.setBackground(Color.GREEN);
 			}

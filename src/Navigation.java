@@ -2,8 +2,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
-import java.net.MalformedURLException;
-import java.net.URL;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -66,38 +64,34 @@ public class Navigation {
 		setCourse.setBackground(original);
 	}
 	private class MyThread extends Thread {
-		
+
 		@Override
 		public void run() {
-	        PIDControllerAngle pidController = new PIDControllerAngle(0.1, 0.01, 0.05);
-	        pidController.setSetpoint(coursebearing); // Set desired setpoint
-	        Integer previousControlOutput = null;
+			PIDControllerAngle pidController = new PIDControllerAngle(0.1, 0.01, 0.05);
+			pidController.setSetpoint(coursebearing); // Set desired setpoint
+			Integer previousControlOutput = null;
 			while (true) {
-				URL url;
-				try {
-					url = new URL(Constant.PI_HOME + Constant.PORT + "/navigation/bearing");
-					Navigation.bearing = GenericGet.getGeneric(url);
-		            double controlOutput = pidController.compute(Navigation.bearing);
-		            controlOutput = controlOutput > 45.0 ? 45.0 : controlOutput;
-		            controlOutput = controlOutput < -45.0 ? -45.0 : controlOutput;
-		            if (previousControlOutput != null && Math.round(controlOutput) != (Integer)previousControlOutput) {
-		            	rudder.setValue((int)Math.round(controlOutput));
-		            	url = new URL(Constant.PI_HOME + Constant.PORT + "/navigation/rudder/"+((int)controlOutput));
-		            	GenericGet.getGeneric(url);
-		            }
-	            	previousControlOutput = (int)Math.round(controlOutput);
-					compass.repaint();
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
+				String url;
+				url = new String("/navigation/bearing");
+				Navigation.bearing = GenericGet.getGeneric(url);
+				double controlOutput = pidController.compute(Navigation.bearing);
+				controlOutput = controlOutput > 45.0 ? 45.0 : controlOutput;
+				controlOutput = controlOutput < -45.0 ? -45.0 : controlOutput;
+				if (previousControlOutput != null && Math.round(controlOutput) != (Integer)previousControlOutput) {
+					rudder.setValue((int)Math.round(controlOutput));
+					url = new String("/navigation/rudder/"+((int)controlOutput));
+					GenericGet.getGeneric(url);
 				}
+				previousControlOutput = (int)Math.round(controlOutput);
+				compass.repaint();
 				try {
-					MyThread.sleep(100);
+					MyThread.sleep(200);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
-			
+
 		}
 	}
 	public static void main(String[] args) {

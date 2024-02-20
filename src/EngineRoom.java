@@ -1,8 +1,6 @@
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.net.MalformedURLException;
-import java.net.URL;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -11,7 +9,6 @@ import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.SwingConstants;
 
-import Const.Constant;
 import GenericGet.GenericGet;
 
 public class EngineRoom {
@@ -68,38 +65,30 @@ public class EngineRoom {
 			while (true) {
 				//only when changed
 				if (previousSlider != null && !previousSlider.equals(newSlider)) {
-					URL url;
-					try {
-						url = new URL(Constant.PI_HOME + Constant.PORT + "/engine/left/" + newSlider);
-						Integer result = GenericGet.getGeneric(url);
-					} catch (MalformedURLException e) {
-						e.printStackTrace();
-					}
+					String url;
+					url = new String("/engine/left/" + newSlider);
+					Integer result = GenericGet.getGeneric(url);
 				}
 				previousSlider = newSlider;
 
 				newSlider = slider.getValue();
 				if (previousRightSlider != null && !previousRightSlider.equals(newRightSlider)) {
-					URL url;
-					try {
-						url = new URL(Constant.PI_HOME + Constant.PORT + "/engine/right/" + newRightSlider);
-						Integer result = GenericGet.getGeneric(url);
-					} catch (MalformedURLException e) {
-						e.printStackTrace();
-					}
+					String url;
+					url = new String("/engine/right/" + newRightSlider);
+					Integer result = GenericGet.getGeneric(url);
 				}
 				previousRightSlider = newRightSlider;
 
 				newRightSlider = rightslider.getValue();
 				//10Hz
 				try {
-					MyThread.sleep(100);
+					MyThread.sleep(200);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
-			
+
 		}
 	}
 

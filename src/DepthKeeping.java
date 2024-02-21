@@ -212,13 +212,13 @@ public class DepthKeeping {
 				url = new String("/dive/depth");
 				Integer depth = GenericGet.getGeneric(url);
 				if (isDiveAngleSet || isAlterDepthAngleSet)
-				if (requiredAngle < 0 && depth >= -diveDepth.getValue()) {
-					requiredAngle = 0;
-					pidController.setSetpoint(requiredAngle); // Set desired setpoint
-				} else if (requiredAngle > 0 && depth <= -diveDepth.getValue()) {
-					requiredAngle = 0;
-					pidController.setSetpoint(requiredAngle); // Set desired setpoint	
-				}
+					if (requiredAngle < 0 && depth >= -diveDepth.getValue()) {
+						requiredAngle = 0;
+						pidController.setSetpoint(requiredAngle); // Set desired setpoint
+					} else if (requiredAngle > 0 && depth <= -diveDepth.getValue()) {
+						requiredAngle = 0;
+						pidController.setSetpoint(requiredAngle); // Set desired setpoint	
+					}
 				url = new String("/dive/dive-angle");
 				actualAngle = GenericGet.getGeneric(url);
 				double controlOutput = pidController.compute(actualAngle);

@@ -16,7 +16,7 @@ public class GenericGet {
 		URL url = null;
 		try {
 			url = new URL(Constant.PI_HOME+Constant.PORT+Constant.PATH_PREFIX+suffix);
-			System.out.println(url.toString());
+			System.out.print(url.toString());
 		} catch (MalformedURLException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -47,7 +47,7 @@ public class GenericGet {
 			rvalue = Integer.parseInt(inString.toString());
 
 			conn.disconnect();
-			System.out.print(rvalue);
+			System.out.println(":"+rvalue);
 
 			return rvalue;
 
@@ -56,7 +56,7 @@ public class GenericGet {
 			e.printStackTrace();
 
 		}
-		System.out.print(rvalue);
+		System.out.println(":"+rvalue);
 		return rvalue;
 
 	}

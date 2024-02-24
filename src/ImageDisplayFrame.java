@@ -18,6 +18,7 @@ public class ImageDisplayFrame extends JFrame {
     private Timer timer;
 
     public ImageDisplayFrame() {
+    	super("Periscope");
         initializeUI();
         startImageUpdateTask();
     }

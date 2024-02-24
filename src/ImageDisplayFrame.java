@@ -42,7 +42,7 @@ public class ImageDisplayFrame extends JFrame {
             }
         };
         // Schedule the task to run every 50ms (20 times per second)
-        timer = new Timer(2000, taskPerformer);
+        timer = new Timer(4000, taskPerformer);
         timer.start();
     }
 

@@ -1,11 +1,14 @@
 package GenericGet;
 
+import java.awt.Image;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+
+import javax.imageio.ImageIO;
 
 import Const.Constant;
 
@@ -60,5 +63,41 @@ public class GenericGet {
 		return rvalue;
 
 	}
+    public static Image getImage(String suffix) {
+        URL url = null;
+        try {
+            url = new URL(Constant.PI_HOME + Constant.PORT + Constant.PATH_PREFIX + suffix);
+            System.out.println("Requesting URL: " + url.toString());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            return null; // Return null if URL is malformed
+        }
+
+        HttpURLConnection conn = null;
+        try {
+            conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("Accept", "image/jpeg");
+			conn.setRequestProperty("Content-Type", "application/json");
+
+            if (conn.getResponseCode() != 200) {
+                throw new RuntimeException("Failed: HTTP error code : " + conn.getResponseCode());
+            }
+
+            // Use ImageIO to read the image directly from the InputStream
+            Image image = ImageIO.read(conn.getInputStream());
+
+            conn.disconnect(); // Disconnect after processing
+            return image; // Return the fetched image
+
+        } catch (IOException e) {
+            e.printStackTrace(); // Log exceptions
+        } finally {
+            if (conn != null) {
+                conn.disconnect(); // Ensure disconnection in case of an exception
+            }
+        }
+        return null; // Return null if the process fails
+    }
 
 }

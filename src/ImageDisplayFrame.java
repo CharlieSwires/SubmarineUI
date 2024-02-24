@@ -1,10 +1,12 @@
+
+import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.ImageIcon;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
@@ -12,7 +14,7 @@ import GenericGet.GenericGet;
 
 public class ImageDisplayFrame extends JFrame {
 
-    private JLabel imageLabel;
+    private ImagePanel imagePanel;
     private Timer timer;
 
     public ImageDisplayFrame() {
@@ -21,9 +23,8 @@ public class ImageDisplayFrame extends JFrame {
     }
 
     private void initializeUI() {
-        imageLabel = new JLabel();
-        imageLabel.setHorizontalAlignment(JLabel.CENTER);
-        this.add(imageLabel);
+        imagePanel = new ImagePanel();
+        this.add(imagePanel);
         this.setSize(640, 480); // Set the initial frame size
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setVisible(true);
@@ -35,9 +36,7 @@ public class ImageDisplayFrame extends JFrame {
             public void actionPerformed(ActionEvent evt) {
                 Image image = GenericGet.getImage("/image/capture"); // Assuming "/capture" is the suffix used in the getImage method
                 if (image != null) {
-                    ImageIcon icon = new ImageIcon(image);
-                    imageLabel.setIcon(icon);
-                    pack(); // Adjust the frame size to fit the image
+                    imagePanel.setImage(image);
                 }
             }
         };
@@ -46,6 +45,53 @@ public class ImageDisplayFrame extends JFrame {
         timer.start();
     }
 
+
+    class ImagePanel extends JPanel {
+        private Image image;
+
+        public void setImage(Image image) {
+            this.image = image;
+            repaint(); // Tell the panel to repaint itself
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            if (image != null) {
+                // Scale the image to fit the panel size while maintaining the aspect ratio
+                Dimension scaledDimension = getScaledDimension(new Dimension(image.getWidth(null), image.getHeight(null)), getSize());
+                Image scaledImage = image.getScaledInstance(scaledDimension.width, scaledDimension.height, Image.SCALE_SMOOTH);
+                int x = (getWidth() - scaledDimension.width) / 2; // Center the image horizontally
+                int y = (getHeight() - scaledDimension.height) / 2; // Center the image vertically
+                g.drawImage(scaledImage, x, y, this);
+            }
+        }
+
+        private Dimension getScaledDimension(Dimension imgSize, Dimension boundary) {
+            int originalWidth = imgSize.width;
+            int originalHeight = imgSize.height;
+            int boundWidth = boundary.width;
+            int boundHeight = boundary.height;
+            int newWidth = originalWidth;
+            int newHeight = originalHeight;
+
+            // Check if the image needs to be scaled down
+            if (originalWidth > boundWidth) {
+                newWidth = boundWidth;
+                // Scale height to maintain aspect ratio
+                newHeight = (newWidth * originalHeight) / originalWidth;
+            }
+
+            // Then check if we need to scale even with the new height
+            if (newHeight > boundHeight) {
+                newHeight = boundHeight;
+                // Scale width to maintain aspect ratio
+                newWidth = (newHeight * originalWidth) / originalHeight;
+            }
+
+            return new Dimension(newWidth, newHeight);
+        }
+    }
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {

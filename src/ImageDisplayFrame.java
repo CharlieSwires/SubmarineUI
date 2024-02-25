@@ -32,6 +32,24 @@ public class ImageDisplayFrame extends JFrame {
         this.add(imagePanel);
         this.setSize(500,500); // Set the initial frame size
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        JButton fullScreenButton = new JButton("Not Full");
+        Color original = fullScreenButton.getBackground();
+        this.add(fullScreenButton,BorderLayout.NORTH);
+        fullScreenButton.addActionListener(e -> {
+        	full = !full;
+			if (!full) {
+				fullScreenButton.setBackground(original);
+				fullScreenButton.setText("Not Full");
+		        idf.setSize(500, 500); // Set the initial frame size
+
+			} else {
+				fullScreenButton.setBackground(Color.GREEN);
+				fullScreenButton.setText("Full");
+		        idf.setSize(1080, 960); // Set the initial frame size
+			}
+            repaint(); // Tell the panel to repaint itself
+
+		});        
         this.setVisible(true);
     }
 
@@ -54,26 +72,6 @@ public class ImageDisplayFrame extends JFrame {
     class ImagePanel extends JPanel {
         private Image image;
 
-        public ImagePanel() {
-            JButton fullScreenButton = new JButton("Not Full");
-            Color original = fullScreenButton.getBackground();
-            this.add(fullScreenButton,BorderLayout.SOUTH);
-            fullScreenButton.addActionListener(e -> {
-            	full = !full;
-    			if (!full) {
-    				fullScreenButton.setBackground(original);
-    				fullScreenButton.setText("Not Full");
-    		        idf.setSize(500, 500); // Set the initial frame size
-
-    			} else {
-    				fullScreenButton.setBackground(Color.GREEN);
-    				fullScreenButton.setText("Full");
-    		        idf.setSize(1080, 960); // Set the initial frame size
-    			}
-                repaint(); // Tell the panel to repaint itself
-
-    		});        	
-        }
         public void setImage(Image image) {
             this.image = image;
             repaint(); // Tell the panel to repaint itself

@@ -55,7 +55,7 @@ public class ImageDisplayFrame extends JFrame {
 			} else {
 				fullScreenButton.setBackground(Color.GREEN);
 				fullScreenButton.setText("HD");
-				idf.setSize(1080, 960); // Set the initial frame size
+				idf.setSize(1920,1080); // Set the initial frame size
 			}
 			repaint(); // Tell the panel to repaint itself
 

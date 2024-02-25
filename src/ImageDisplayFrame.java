@@ -68,7 +68,7 @@ public class ImageDisplayFrame extends JFrame {
 			// Use a separate thread for long-running operations
 			new Thread(() -> {
 				Image image = GenericGet.getImage("/image/capture/photo"); // Assuming "/capture" is the suffix used in the getImage method
-				File photo = new File("photo"+LocalDateTime.now().toString().replaceAll("\\.","_").replaceAll("\\:","_")+".jpg");
+				File photo = new File("photo"+LocalDateTime.now().toString().replaceAll("[.:]", "_")+".jpg");
 				try {
 					ImageIO.write((RenderedImage) image, "JPEG", photo);
 				} catch (IOException e1) {

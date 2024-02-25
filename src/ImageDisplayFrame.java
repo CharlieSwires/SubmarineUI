@@ -1,10 +1,13 @@
 
+import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
@@ -16,7 +19,8 @@ public class ImageDisplayFrame extends JFrame {
 
     private ImagePanel imagePanel;
     private Timer timer;
-
+    private boolean full = false;
+    private static JFrame idf;
     public ImageDisplayFrame() {
     	super("Periscope");
         initializeUI();
@@ -26,7 +30,7 @@ public class ImageDisplayFrame extends JFrame {
     private void initializeUI() {
         imagePanel = new ImagePanel();
         this.add(imagePanel);
-        this.setSize(640, 480); // Set the initial frame size
+        this.setSize(500,500); // Set the initial frame size
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setVisible(true);
     }
@@ -35,7 +39,7 @@ public class ImageDisplayFrame extends JFrame {
         // Define the task to fetch and display the image
         ActionListener taskPerformer = new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
-                Image image = GenericGet.getImage("/image/capture"); // Assuming "/capture" is the suffix used in the getImage method
+                Image image = GenericGet.getImage("/image/capture/"+full); // Assuming "/capture" is the suffix used in the getImage method
                 if (image != null) {
                     imagePanel.setImage(image);
                 }
@@ -50,6 +54,26 @@ public class ImageDisplayFrame extends JFrame {
     class ImagePanel extends JPanel {
         private Image image;
 
+        public ImagePanel() {
+            JButton fullScreenButton = new JButton("Not Full");
+            Color original = fullScreenButton.getBackground();
+            this.add(fullScreenButton,BorderLayout.SOUTH);
+            fullScreenButton.addActionListener(e -> {
+            	full = !full;
+    			if (!full) {
+    				fullScreenButton.setBackground(original);
+    				fullScreenButton.setText("Not Full");
+    		        idf.setSize(500, 500); // Set the initial frame size
+
+    			} else {
+    				fullScreenButton.setBackground(Color.GREEN);
+    				fullScreenButton.setText("Full");
+    		        idf.setSize(1080, 960); // Set the initial frame size
+    			}
+                repaint(); // Tell the panel to repaint itself
+
+    		});        	
+        }
         public void setImage(Image image) {
             this.image = image;
             repaint(); // Tell the panel to repaint itself
@@ -98,7 +122,7 @@ public class ImageDisplayFrame extends JFrame {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                new ImageDisplayFrame(); // Create and display the JFrame
+                idf = new ImageDisplayFrame(); // Create and display the JFrame
             }
         });
     }

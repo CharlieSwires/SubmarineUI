@@ -6,7 +6,11 @@ import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.RenderedImage;
+import java.io.File;
+import java.io.IOException;
 
+import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -33,8 +37,12 @@ public class ImageDisplayFrame extends JFrame {
         this.setSize(500,500); // Set the initial frame size
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         JButton fullScreenButton = new JButton("Not Full");
+        JButton photoButton = new JButton("Photo");
         Color original = fullScreenButton.getBackground();
-        this.add(fullScreenButton,BorderLayout.NORTH);
+        JPanel top = new JPanel();
+        top.add(fullScreenButton);
+        top.add(photoButton);
+        this.add(top,BorderLayout.NORTH);
         fullScreenButton.addActionListener(e -> {
         	full = !full;
 			if (!full) {
@@ -48,6 +56,19 @@ public class ImageDisplayFrame extends JFrame {
 		        idf.setSize(1080, 960); // Set the initial frame size
 			}
             repaint(); // Tell the panel to repaint itself
+
+		});          
+        photoButton.addActionListener(e -> {
+        	photoButton.setBackground(Color.GREEN);
+
+            Image image = GenericGet.getImage("/image/capture/photo"); // Assuming "/capture" is the suffix used in the getImage method
+            File photo = new File("photo.jpg");
+            try {
+				ImageIO.write((RenderedImage) image, "JPEG", photo);
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+            photoButton.setBackground(original);
 
 		});        
         this.setVisible(true);

@@ -38,7 +38,7 @@ public class ImageDisplayFrame extends JFrame {
 		this.add(imagePanel);
 		this.setSize(500,500); // Set the initial frame size
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		JButton fullScreenButton = new JButton("Not Full");
+		JButton fullScreenButton = new JButton("SD");
 		JButton photoButton = new JButton("Photo");
 		Color original = fullScreenButton.getBackground();
 		JPanel top = new JPanel();
@@ -49,12 +49,12 @@ public class ImageDisplayFrame extends JFrame {
 			full = !full;
 			if (!full) {
 				fullScreenButton.setBackground(original);
-				fullScreenButton.setText("Not Full");
+				fullScreenButton.setText("SD");
 				idf.setSize(500, 500); // Set the initial frame size
 
 			} else {
 				fullScreenButton.setBackground(Color.GREEN);
-				fullScreenButton.setText("Full");
+				fullScreenButton.setText("HD");
 				idf.setSize(1080, 960); // Set the initial frame size
 			}
 			repaint(); // Tell the panel to repaint itself

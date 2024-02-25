@@ -9,6 +9,7 @@ import java.awt.event.ActionListener;
 import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDateTime;
 
 import javax.imageio.ImageIO;
 import javax.swing.JButton;
@@ -67,7 +68,7 @@ public class ImageDisplayFrame extends JFrame {
 			// Use a separate thread for long-running operations
 			new Thread(() -> {
 				Image image = GenericGet.getImage("/image/capture/photo"); // Assuming "/capture" is the suffix used in the getImage method
-				File photo = new File("photo.jpg");
+				File photo = new File("photo"+LocalDateTime.now().toString()+".jpg");
 				try {
 					ImageIO.write((RenderedImage) image, "JPEG", photo);
 				} catch (IOException e1) {

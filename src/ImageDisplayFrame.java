@@ -4,21 +4,12 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Image;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.image.RenderedImage;
-import java.io.File;
-import java.io.IOException;
-import java.time.LocalDateTime;
 
-import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
-
-import GenericGet.GenericGet;
 
 public class ImageDisplayFrame extends JFrame {
 
@@ -30,7 +21,7 @@ public class ImageDisplayFrame extends JFrame {
 	public ImageDisplayFrame() {
 		super("Periscope");
 		initializeUI();
-		startImageUpdateTask();
+		//startImageUpdateTask();
 	}
 
 	private void initializeUI() {
@@ -46,6 +37,8 @@ public class ImageDisplayFrame extends JFrame {
 		top.add(photoButton);
 		this.add(top,BorderLayout.NORTH);
 		fullScreenButton.addActionListener(e -> {
+			disable = true;
+
 			full = !full;
 			if (!full) {
 				fullScreenButton.setBackground(original);
@@ -55,8 +48,9 @@ public class ImageDisplayFrame extends JFrame {
 			} else {
 				fullScreenButton.setBackground(Color.GREEN);
 				fullScreenButton.setText("HD");
-				idf.setSize(1920,1080); // Set the initial frame size
 			}
+			//GenericGet.getGeneric("/image/capture/"+full);
+
 			repaint(); // Tell the panel to repaint itself
 
 		});          
@@ -66,45 +60,45 @@ public class ImageDisplayFrame extends JFrame {
 			photoButton.setText("Taking");
 
 			// Use a separate thread for long-running operations
-			new Thread(() -> {
-				Image image = GenericGet.getImage("/image/capture/photo"); // Assuming "/capture" is the suffix used in the getImage method
-				File photo = new File("photo"+LocalDateTime.now().toString().replaceAll("[.:]", "_")+".jpg");
-				try {
-					ImageIO.write((RenderedImage) image, "JPEG", photo);
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}
-
-				// Update the button back to its original state on the EDT
-				SwingUtilities.invokeLater(() -> {
-					photoButton.setBackground(original);
-					photoButton.setText("Photo");
-					disable = false;
-				});
-			}).start();
+//			new Thread(() -> {
+//				Image image = GenericGet.getImage("/image/capture/photo"); // Assuming "/capture" is the suffix used in the getImage method
+//				File photo = new File("photo"+LocalDateTime.now().toString().replaceAll("[.:]", "_")+".jpg");
+//				try {
+//					ImageIO.write((RenderedImage) image, "JPEG", photo);
+//				} catch (IOException e1) {
+//					e1.printStackTrace();
+//				}
+//
+//				// Update the button back to its original state on the EDT
+//				SwingUtilities.invokeLater(() -> {
+//					photoButton.setBackground(original);
+//					photoButton.setText("Photo");
+//					disable = false;
+//				});
+//			}).start();
 		});
 
 		this.setVisible(true);
 	}
 
-	private void startImageUpdateTask() {
-		// Define the task to fetch and display the image
-		ActionListener taskPerformer = new ActionListener() {
-			public void actionPerformed(ActionEvent evt) {
-				if(!disable ) {
-					Image image = GenericGet.getImage("/image/capture/"+full); // Assuming "/capture" is the suffix used in the getImage method
-					if (image != null) {
-						imagePanel.setImage(image);
-					}
-				}
-			}
-		};
-		// Schedule the task to run every 50ms (20 times per second)
-		if(!disable ) {
-			timer = new Timer(4000, taskPerformer);
-			timer.start();
-		}
-	}
+//	private void startImageUpdateTask() {
+//		// Define the task to fetch and display the image
+//		ActionListener taskPerformer = new ActionListener() {
+//			public void actionPerformed(ActionEvent evt) {
+//				if(!disable ) {
+//					Image image = //GenericGet.getImage("/image/capture/"+full); // Assuming "/capture" is the suffix used in the getImage method
+//					if (image != null) {
+//						imagePanel.setImage(image);
+//					}
+//				}
+//			}
+//		};
+//		// Schedule the task to run every 50ms (20 times per second)
+//		if(!disable ) {
+//			timer = new Timer(4000, taskPerformer);
+//			timer.start();
+//		}
+//	}
 
 
 	class ImagePanel extends JPanel {

@@ -67,7 +67,11 @@ public class EngineRoom {
 				if (previousSlider != null && !previousSlider.equals(newSlider)) {
 					String url;
 					url = new String("/engine/left/" + newSlider);
-					Integer result = GenericGet.getGeneric(url);
+					try {
+						Integer result = GenericGet.getGeneric(url);
+					} catch (RuntimeException e) {
+						e.printStackTrace();
+					}
 				}
 				previousSlider = newSlider;
 
@@ -75,7 +79,11 @@ public class EngineRoom {
 				if (previousRightSlider != null && !previousRightSlider.equals(newRightSlider)) {
 					String url;
 					url = new String("/engine/right/" + newRightSlider);
-					Integer result = GenericGet.getGeneric(url);
+					try {
+						Integer result = GenericGet.getGeneric(url);
+					} catch (RuntimeException e) {
+						e.printStackTrace();
+					}
 				}
 				previousRightSlider = newRightSlider;
 

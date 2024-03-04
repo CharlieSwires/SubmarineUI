@@ -73,14 +73,23 @@ public class Navigation {
 			while (true) {
 				String url;
 				url = new String("/navigation/bearing");
-				Navigation.bearing = GenericGet.getGeneric(url);
+				try {
+					Navigation.bearing = GenericGet.getGeneric(url);
+				} catch (RuntimeException e) {
+					e.printStackTrace();
+				}
+
 				double controlOutput = pidController.compute(Navigation.bearing);
 				controlOutput = controlOutput > 45.0 ? 45.0 : controlOutput;
 				controlOutput = controlOutput < -45.0 ? -45.0 : controlOutput;
 				if (previousControlOutput != null && Math.round(controlOutput) != (Integer)previousControlOutput) {
 					rudder.setValue((int)Math.round(controlOutput));
 					url = new String("/navigation/rudder/"+((int)controlOutput));
-					GenericGet.getGeneric(url);
+					try {
+						Integer result = GenericGet.getGeneric(url);
+					} catch (RuntimeException e) {
+						e.printStackTrace();
+					}
 				}
 				previousControlOutput = (int)Math.round(controlOutput);
 				compass.repaint();

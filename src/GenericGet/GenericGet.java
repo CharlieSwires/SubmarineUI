@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.SocketException;
 import java.net.URL;
 
 import javax.imageio.ImageIO;
@@ -57,10 +58,15 @@ public class GenericGet {
 		} catch (IOException e) {
 
 			e.printStackTrace();
+			throw new RuntimeException("Failed : "
+					+ e.getMessage());
+
+
+		} catch (Exception e2) {
+			throw new RuntimeException("Failed : "
+					+ e2.getMessage());
 
 		}
-		System.out.println(":"+rvalue);
-		return rvalue;
 
 	}
     public static Image getImage(String suffix) {

@@ -99,7 +99,13 @@ public class DepthKeeping {
 			diveAngle.setValue(-45);
 			diveDepth.setValue(-100000); //100m
 			url = new String("/dive/fill-tank/true");
-			GenericGet.getGeneric(url);
+			try {
+				GenericGet.getGeneric(url);
+				error = COMMS_OK;
+			} catch (RuntimeException e) { //need something other end, if COMMS_LOST this won't work.
+				error = COMMS_LOST;
+				e.printStackTrace();
+			}
 			allFull();
 			rudderZero();
 			break;
@@ -107,8 +113,13 @@ public class DepthKeeping {
 			diveAngle.setValue(-45);
 			diveDepth.setValue(-8000); //8m
 			url = new String("/dive/fill-tank/true");
-			GenericGet.getGeneric(url);
-
+			try {
+				GenericGet.getGeneric(url);
+				error = COMMS_OK;
+			} catch (RuntimeException e) { //need something other end, if COMMS_LOST this won't work.
+				error = COMMS_LOST;
+				e.printStackTrace();
+			}
 			allFull();
 			rudderZero();
 			break; 
@@ -116,7 +127,13 @@ public class DepthKeeping {
 			diveAngle.setValue(45);
 			diveDepth.setValue(0);
 			url = new String("/dive/fill-tank/false");
-			GenericGet.getGeneric(url);
+			try {
+				GenericGet.getGeneric(url);
+				error = COMMS_OK;
+			} catch (RuntimeException e) { //need something other end, if COMMS_LOST this won't work.
+				error = COMMS_LOST;
+				e.printStackTrace();
+			}
 			allFull();
 			rudderZero();
 			break; 
@@ -137,7 +154,13 @@ public class DepthKeeping {
 		case DIVE:
 			if (diveDepth.getValue() > -getDepth() && diveAngle.getValue() < 0) {
 				url = new String("/dive/fill-tank/true");
-				GenericGet.getGeneric(url);
+				try {
+					GenericGet.getGeneric(url);
+					error = COMMS_OK;
+				} catch (RuntimeException e) { //need something other end, if COMMS_LOST this won't work.
+					error = COMMS_LOST;
+					e.printStackTrace();
+				}
 				rudderZero();
 			} else {
 				success = false;
@@ -152,24 +175,54 @@ public class DepthKeeping {
 	private static void allFull() {
 		String url;
 		url = new String("/engine/right/" + 100);
-		GenericGet.getGeneric(url);
+		try {
+			GenericGet.getGeneric(url);
+			error = COMMS_OK;
+		} catch (RuntimeException e) { //need something other end, if COMMS_LOST this won't work.
+			error = COMMS_LOST;
+			e.printStackTrace();
+		}
 		url = new String("/engine/left/" + 100);
-		GenericGet.getGeneric(url);
+		try {
+			GenericGet.getGeneric(url);
+			error = COMMS_OK;
+		} catch (RuntimeException e) { //need something other end, if COMMS_LOST this won't work.
+			error = COMMS_LOST;
+			e.printStackTrace();
+		}
 	}
 
 	private static void rudderZero() {
 		String url;
 		url = new String("/navigation/rudder/"+0);
-		GenericGet.getGeneric(url);
+		try {
+			GenericGet.getGeneric(url);
+			error = COMMS_OK;
+		} catch (RuntimeException e) { //need something other end, if COMMS_LOST this won't work.
+			error = COMMS_LOST;
+			e.printStackTrace();
+		}
 
 	}
 
 	private static void allStop() {
 		String url;
 		url = new String("/engine/right/" + 0);
-		GenericGet.getGeneric(url);
+		try {
+			GenericGet.getGeneric(url);
+			error = COMMS_OK;
+		} catch (RuntimeException e) { //need something other end, if COMMS_LOST this won't work.
+			error = COMMS_LOST;
+			e.printStackTrace();
+		}
 		url = new String("/engine/left/" + 0);
-		GenericGet.getGeneric(url);
+		try {
+			GenericGet.getGeneric(url);
+			error = COMMS_OK;
+		} catch (RuntimeException e) { //need something other end, if COMMS_LOST this won't work.
+			error = COMMS_LOST;
+			e.printStackTrace();
+		}
 	}
 
 	private static int getDepth() {
@@ -179,7 +232,7 @@ public class DepthKeeping {
 			url = new String("/dive/depth");
 			depth = GenericGet.getGeneric(url);
 			error = COMMS_OK;
-		} catch (RuntimeException e2) { //need something other end, if COMMS_LOST this won't work.
+		} catch (RuntimeException e) { //need something other end, if COMMS_LOST this won't work.
 			error = COMMS_LOST;
 			resetButtons(original, crashDive, scuttle, emergencySurface,freeze,dive,alterDepth);
 			success = quickControls(EMERGENCY.EMERGENCY_SURFACE, diveAngle, diveDepth);
@@ -209,8 +262,8 @@ public class DepthKeeping {
 			Integer previousControlOutput = null;
 			while (true) {
 				String url;
-				url = new String("/dive/depth");
-				Integer depth = GenericGet.getGeneric(url);
+				Integer depth = getDepth();
+
 				if (isDiveAngleSet || isAlterDepthAngleSet)
 					if (requiredAngle < 0 && depth >= -diveDepth.getValue()) {
 						requiredAngle = 0;
@@ -220,7 +273,14 @@ public class DepthKeeping {
 						pidController.setSetpoint(requiredAngle); // Set desired setpoint	
 					}
 				url = new String("/dive/dive-angle");
-				actualAngle = GenericGet.getGeneric(url);
+				try {
+					actualAngle = GenericGet.getGeneric(url);
+					error = COMMS_OK;
+				} catch (RuntimeException e) {
+					e.printStackTrace();
+					error = COMMS_LOST;
+					continue;
+				}
 				double controlOutput = pidController.compute(actualAngle);
 				controlOutput = controlOutput > 45.0 ? 45.0 : controlOutput;
 				controlOutput = controlOutput < -45.0 ? -45.0 : controlOutput;

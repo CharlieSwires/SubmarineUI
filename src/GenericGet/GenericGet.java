@@ -21,7 +21,6 @@ public class GenericGet {
 			url = new URL(Constant.PI_HOME+Constant.PORT+Constant.PATH_PREFIX+suffix);
 			System.out.print(url.toString());
 		} catch (MalformedURLException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		
@@ -55,7 +54,6 @@ public class GenericGet {
 			return rvalue;
 
 		} catch (Exception  e2) {
-			e2.printStackTrace();
 			throw new RuntimeException("Failed : "
 					+ e2.getMessage());
 

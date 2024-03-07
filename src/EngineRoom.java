@@ -78,10 +78,16 @@ public class EngineRoom {
 						leftTitle.setForeground(originalColour);
 						middleTitle.setForeground(originalColour);
 						rightTitle.setForeground(originalColour);
+						leftTitle.setText("LEFT");
+						middleTitle.setText("COMMON");
+						rightTitle.setText("RIGHT");
 					} catch (RuntimeException e) {
 						leftTitle.setForeground(Color.RED);
 						middleTitle.setForeground(Color.RED);
 						rightTitle.setForeground(Color.RED);
+						leftTitle.setText("NO");
+						middleTitle.setText("COMMS");
+						rightTitle.setText("FOUND");
 					} finally {
 						frame.repaint();
 					}
@@ -97,10 +103,16 @@ public class EngineRoom {
 						leftTitle.setForeground(originalColour);
 						middleTitle.setForeground(originalColour);
 						rightTitle.setForeground(originalColour);
+						leftTitle.setText("LEFT");
+						middleTitle.setText("COMMON");
+						rightTitle.setText("RIGHT");
 					} catch (RuntimeException e) {
 						leftTitle.setForeground(Color.RED);
 						middleTitle.setForeground(Color.RED);
 						rightTitle.setForeground(Color.RED);
+						leftTitle.setText("NO");
+						middleTitle.setText("COMMS");
+						rightTitle.setText("FOUND");
 					} finally {
 						frame.repaint();
 					}

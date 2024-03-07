@@ -88,6 +88,7 @@ public class EngineRoom {
 						leftTitle.setText("NO");
 						middleTitle.setText("COMMS");
 						rightTitle.setText("FOUND");
+						System.out.println(e);
 					} finally {
 						frame.repaint();
 					}
@@ -113,6 +114,7 @@ public class EngineRoom {
 						leftTitle.setText("NO");
 						middleTitle.setText("COMMS");
 						rightTitle.setText("FOUND");
+						System.out.println(e);
 					} finally {
 						frame.repaint();
 					}

@@ -15,10 +15,16 @@ public class EngineRoom {
 	public enum EMERGENCY {
 		ALL_STOP, FULL_LEFT, FULL_RIGHT, ALL_FULL, ALL_BACK
 	}
+	// Creating the JFrame for the application
+	private static JFrame frame = new JFrame("Engine Room");
 	// Creating the JSlider
 	private static JSlider slider = new JSlider(JSlider.VERTICAL, -100, 100, 0); // Arguments: orientation, min, max, initial value
 	// Creating the JSlider
 	private static JSlider rightslider = new JSlider(JSlider.VERTICAL, -100, 100, 0); // Arguments: orientation, min, max, initial value
+	private static JLabel leftTitle = new JLabel("LEFT", SwingConstants.LEFT);
+	private static JLabel middleTitle = new JLabel("COMMON", SwingConstants.CENTER);
+	private static JLabel rightTitle = new JLabel("RIGHT", SwingConstants.RIGHT);
+	private static Color originalColour = rightTitle.getForeground();
 
 	private static void quickControls(EngineRoom.EMERGENCY action, JSlider slider, JSlider rightslider) {
 		switch (action) {
@@ -69,8 +75,15 @@ public class EngineRoom {
 					url = new String("/engine/left/" + newSlider);
 					try {
 						Integer result = GenericGet.getGeneric(url);
+						leftTitle.setForeground(originalColour);
+						middleTitle.setForeground(originalColour);
+						rightTitle.setForeground(originalColour);
 					} catch (RuntimeException e) {
-						e.printStackTrace();
+						leftTitle.setForeground(Color.RED);
+						middleTitle.setForeground(Color.RED);
+						rightTitle.setForeground(Color.RED);
+					} finally {
+						frame.repaint();
 					}
 				}
 				previousSlider = newSlider;
@@ -81,8 +94,15 @@ public class EngineRoom {
 					url = new String("/engine/right/" + newRightSlider);
 					try {
 						Integer result = GenericGet.getGeneric(url);
+						leftTitle.setForeground(originalColour);
+						middleTitle.setForeground(originalColour);
+						rightTitle.setForeground(originalColour);
 					} catch (RuntimeException e) {
-						e.printStackTrace();
+						leftTitle.setForeground(Color.RED);
+						middleTitle.setForeground(Color.RED);
+						rightTitle.setForeground(Color.RED);
+					} finally {
+						frame.repaint();
 					}
 				}
 				previousRightSlider = newRightSlider;
@@ -101,8 +121,6 @@ public class EngineRoom {
 	}
 
 	public static void main(String[] args) {
-		// Creating the JFrame for the application
-		JFrame frame = new JFrame("Engine Room");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setSize(500, 550);
 
@@ -169,9 +187,6 @@ public class EngineRoom {
 		// Adding the panel to the frame
 		frame.add(rightpanel, BorderLayout.EAST);
 		JButton emergencyLeft = new JButton("Emergency Left");
-		JLabel leftTitle = new JLabel("LEFT", SwingConstants.LEFT);
-		JLabel middleTitle = new JLabel("COMMON", SwingConstants.CENTER);
-		JLabel rightTitle = new JLabel("RIGHT", SwingConstants.RIGHT);
 		JButton emergencyRight = new JButton("Emergency Right");
 		JPanel toppanel = new JPanel();
 		toppanel.add(emergencyLeft);

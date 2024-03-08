@@ -33,6 +33,10 @@ Navigation.java
 ---------------
 <img src="https://raw.githubusercontent.com/CharlieSwires/SubmarineUI/master/NavigationRoom.png" width="500" height="500" alt="NavigationRoom" title="Navigation Room"/>
 
+All Together
+------------
+<img src="https://raw.githubusercontent.com/CharlieSwires/SubmarineUI/master/All.png" width="1920" height="1080" alt="All" title="All Together"/>
+
 <p> Const contains the IP address of the Pi and the port number. </p>
 <p> GenericGet contains the get request used by all of the UI.</p>
 <p> pid contains the pid controller used for dive angle and navigation.</p>

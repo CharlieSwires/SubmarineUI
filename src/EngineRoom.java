@@ -89,8 +89,6 @@ public class EngineRoom {
 						middleTitle.setText("COMMS");
 						rightTitle.setText("FOUND");
 						System.out.println(e);
-					} finally {
-						frame.repaint();
 					}
 				}
 				previousSlider = newSlider;
@@ -115,9 +113,27 @@ public class EngineRoom {
 						middleTitle.setText("COMMS");
 						rightTitle.setText("FOUND");
 						System.out.println(e);
-					} finally {
-						frame.repaint();
 					}
+				}
+				String url;
+				url = new String("/engine/cpu-temp");
+				try {
+					Integer result = GenericGet.getGeneric(url);
+					frame.setTitle("Engine Room temp=" + (result/10.0) + "Celcius");
+					leftTitle.setForeground(originalColour);
+					middleTitle.setForeground(originalColour);
+					rightTitle.setForeground(originalColour);
+					leftTitle.setText("LEFT");
+					middleTitle.setText("COMMON");
+					rightTitle.setText("RIGHT");
+				} catch (RuntimeException e) {
+					leftTitle.setForeground(Color.RED);
+					middleTitle.setForeground(Color.RED);
+					rightTitle.setForeground(Color.RED);
+					leftTitle.setText("NO");
+					middleTitle.setText("COMMS");
+					rightTitle.setText("FOUND");
+					System.out.println(e);
 				}
 				previousRightSlider = newRightSlider;
 

@@ -22,15 +22,15 @@ User Interface
 
 DepthKeeping.java
 -----------------
-<img src="https://github.com/CharlieSwires/SubmarineUI/tree/master/DepthKeepingNoComms.png" width="500" height="500" alt="DepthKeepingNoComms" title="Depth Keeping No Comms"/>
+<img src="https://github.com/CharlieSwires/SubmarineUI/tree/master/DepthKeepingNoComms.png" width="500" height="500" alt="alt text" title="Depth Keeping No Comms"/>
 
 EngineRoom.java
 ---------------
-<img src="https://github.com/CharlieSwires/SubmarineUI/tree/master/EngineRoomNoComms.png" width="500" height="500" alt="EngineRoomNoComms" title="Engine Room No Comms"/>
+<img src="https://github.com/CharlieSwires/SubmarineUI/tree/master/EngineRoomNoComms.png" width="500" height="500" alt="alt text" title="Engine Room No Comms"/>
 
 Navigation.java
 ---------------
-<img src="https://github.com/CharlieSwires/SubmarineUI/tree/master/NavigationRoom.png" width="500" height="500" alt="NavigationRoom" title="Navigation Room"/>
+<img src="https://github.com/CharlieSwires/SubmarineUI/tree/master/NavigationRoom.png" width="500" height="500" alt="alt text" title="Navigation Room"/>
 
 <p> Const contains the IP address of the Pi and the port number. </p>
 <p> GenericGet contains the get request used by all of the UI.</p>

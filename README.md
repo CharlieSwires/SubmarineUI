@@ -16,6 +16,7 @@ Playing the Video Stream
 
 <p>On your PC which is sharing it's WiFi hotspot with the Pi
 connect to rtsp://192.168.137.205:8554/ on VLC. Your IP address may be different.</p>
+<img src="https://raw.githubusercontent.com/CharlieSwires/SubmarineUI/master/VLCFromPi.png" width="640" height="480" alt="VLCFromPi" title="VLC From Pi On Host"/>
 
 User Interface
 --------------

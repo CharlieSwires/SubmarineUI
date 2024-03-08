@@ -23,7 +23,7 @@ User Interface
 
 DepthKeeping.java
 -----------------
-<img src="https://raw.githubusercontent.com/CharlieSwires/SubmarineUI/master/DepthKeepingNoComms.png" width="500" height="500" alt="DepthKeepingNoComms" title="Depth Keeping No Comms"/>
+<img src="https://raw.githubusercontent.com/CharlieSwires/SubmarineUI/master/DepthKeeping.png" width="500" height="500" alt="DepthKeepingNoComms" title="Depth Keeping No Comms"/>
 
 EngineRoom.java
 ---------------

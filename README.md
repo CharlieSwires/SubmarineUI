@@ -35,7 +35,7 @@ Navigation.java
 
 All Together
 ------------
-<img src="https://raw.githubusercontent.com/CharlieSwires/SubmarineUI/master/All.png" width="1000" height="562" alt="All" title="All Together"/>
+<img src="https://raw.githubusercontent.com/CharlieSwires/SubmarineUI/master/All.png" width="800" height="450" alt="All" title="All Together"/>
 
 <p> Const contains the IP address of the Pi and the port number. </p>
 <p> GenericGet contains the get request used by all of the UI.</p>

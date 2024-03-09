@@ -46,11 +46,11 @@ public class DepthKeeping {
 			g.drawLine(10+100, 120+100, 
 					10+100+(int)(100*Math.sin((-angle+90)/(180.0/Math.PI))), 
 					120+100-(int)(100*Math.cos((-angle+90)/(180.0/Math.PI))));
-			g.drawChars("-90".toCharArray(), 0, 3, 10+100+(int)(100*Math.sin((0)/(180.0/Math.PI))), 
+			g.drawChars("+90".toCharArray(), 0, 3, 10+100+(int)(100*Math.sin((0)/(180.0/Math.PI))), 
 					120+100-(int)(100*Math.cos((0)/(180.0/Math.PI))));
 			g.drawChars("0".toCharArray(), 0, 1, 10+100+(int)(100*Math.sin((0+90)/(180.0/Math.PI))), 
 					120+100-(int)(100*Math.cos((+90)/(180.0/Math.PI))));
-			g.drawChars("+90".toCharArray(), 0, 3, 10+100+(int)(100*Math.sin((+180)/(180.0/Math.PI))), 
+			g.drawChars("-90".toCharArray(), 0, 3, 10+100+(int)(100*Math.sin((+180)/(180.0/Math.PI))), 
 					120+100+10-(int)(100*Math.cos((+180)/(180.0/Math.PI))));
 			g.drawChars(("Actual Depth:"+getDepth()+"mm    ").toCharArray(), 0, 20, -60+100+(int)(100*Math.sin((+180)/(180.0/Math.PI))), 
 					120+100+30-(int)(100*Math.cos((+180)/(180.0/Math.PI))));
@@ -144,15 +144,16 @@ public class DepthKeeping {
 			rudderZero();
 			break; 
 		case ALTER_DEPTH:
-			if ((diveDepth.getValue() < -getDepth() && diveAngle.getValue() > 0) ||
-					(diveDepth.getValue() > -getDepth() && diveAngle.getValue() < 0)) {
-				rudderZero();				
+			if ((diveDepth.getValue() < getDepth() && diveAngle.getValue() > 0) ||
+					(diveDepth.getValue() > getDepth() && diveAngle.getValue() < 0)) {
+				rudderZero();
+				success = true;
 			} else {
 				success = false;
 			}
 			break; 
 		case DIVE:
-			if (diveDepth.getValue() > -getDepth() && diveAngle.getValue() < 0) {
+			if (-diveDepth.getValue() > -getDepth() && diveAngle.getValue() < 0) {
 				url = new String("/dive/fill-tank/true");
 				try {
 					GenericGet.getGeneric(url);
@@ -162,6 +163,7 @@ public class DepthKeeping {
 					e.printStackTrace();
 				}
 				rudderZero();
+				success = true;
 			} else {
 				success = false;
 			}
@@ -265,10 +267,10 @@ public class DepthKeeping {
 				Integer depth = getDepth();
 
 				if (isDiveAngleSet || isAlterDepthAngleSet)
-					if (requiredAngle < 0 && depth >= -diveDepth.getValue()) {
+					if (requiredAngle < 0 && -depth >= -diveDepth.getValue()) {
 						requiredAngle = 0;
 						pidController.setSetpoint(requiredAngle); // Set desired setpoint
-					} else if (requiredAngle > 0 && depth <= -diveDepth.getValue()) {
+					} else if (requiredAngle > 0 && depth >= diveDepth.getValue()) {
 						requiredAngle = 0;
 						pidController.setSetpoint(requiredAngle); // Set desired setpoint	
 					}

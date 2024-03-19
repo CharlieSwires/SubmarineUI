@@ -114,6 +114,10 @@ public class DepthKeeping {
 				error = COMMS_LOST;
 				e.printStackTrace();
 			}
+			reference(diveAngle.getValue());
+			pidController = new PIDControllerAngle(0.1, 0.01, 0.05);
+			previousControlOutput = null;
+			isAlterDepthAngleSet = true;
 			allFull();
 			rudderZero();
 			break;
@@ -128,6 +132,10 @@ public class DepthKeeping {
 				error = COMMS_LOST;
 				e.printStackTrace();
 			}
+			reference(diveAngle.getValue());
+			pidController = new PIDControllerAngle(0.1, 0.01, 0.05);
+			previousControlOutput = null;
+			isAlterDepthAngleSet = true;
 			allFull();
 			rudderZero();
 			break; 
@@ -142,12 +150,20 @@ public class DepthKeeping {
 				error = COMMS_LOST;
 				e.printStackTrace();
 			}
+			reference(diveAngle.getValue());
+			pidController = new PIDControllerAngle(0.1, 0.01, 0.05);
+			previousControlOutput = null;
+			isAlterDepthAngleSet = true;
 			allFull();
 			rudderZero();
 			break; 
 		case FREEZE:
 			diveAngle.setValue(0);
 			diveDepth.setValue(-depth); //current depth
+			reference(diveAngle.getValue());
+			pidController = new PIDControllerAngle(0.1, 0.01, 0.05);
+			previousControlOutput = null;
+			isAlterDepthAngleSet = true;
 			allStop();
 			rudderZero();
 			break; 

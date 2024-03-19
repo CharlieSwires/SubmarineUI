@@ -20,6 +20,9 @@ public class Navigation {
 	private static Integer relative = 0;
 	private static Integer bearing = -20;
 	private static Integer coursebearing = 0;
+	private static PIDControllerAngle pidController = new PIDControllerAngle(0.1, 0.01, 0.05);
+	private static Integer previousControlOutput = null;
+
 	// Creating the JSlider
 	private static JSlider rudder = new JSlider(JSlider.HORIZONTAL, -45, 45, 0); // Arguments: orientation, min, max, initial value
 	private static JPanel compass = new JPanel() {
@@ -67,9 +70,6 @@ public class Navigation {
 
 		@Override
 		public void run() {
-			PIDControllerAngle pidController = new PIDControllerAngle(0.1, 0.01, 0.05);
-			pidController.setSetpoint(coursebearing); // Set desired setpoint
-			Integer previousControlOutput = null;
 			while (true) {
 				String url;
 				url = new String("/navigation/bearing");
@@ -78,23 +78,24 @@ public class Navigation {
 				} catch (RuntimeException e) {
 					e.printStackTrace();
 				}
-
-				double controlOutput = pidController.compute(Navigation.bearing);
-				controlOutput = controlOutput > 45.0 ? 45.0 : controlOutput;
-				controlOutput = controlOutput < -45.0 ? -45.0 : controlOutput;
-				if (previousControlOutput != null && Math.round(controlOutput) != (Integer)previousControlOutput) {
-					rudder.setValue((int)Math.round(controlOutput));
-					url = new String("/navigation/rudder/"+((int)controlOutput));
-					try {
-						Integer result = GenericGet.getGeneric(url);
-					} catch (RuntimeException e) {
-						e.printStackTrace();
+				if (isCourseSet) {
+					double controlOutput = pidController.compute(Navigation.bearing);
+					controlOutput = controlOutput > 45.0 ? 45.0 : controlOutput;
+					controlOutput = controlOutput < -45.0 ? -45.0 : controlOutput;
+					if (previousControlOutput != null && Math.round(controlOutput) != (Integer)previousControlOutput) {
+						rudder.setValue((int)Math.round(controlOutput));
+						url = new String("/navigation/rudder/"+((int)controlOutput));
+						try {
+							Integer result = GenericGet.getGeneric(url);
+						} catch (RuntimeException e) {
+							e.printStackTrace();
+						}
 					}
+					previousControlOutput = (int)Math.round(controlOutput);
 				}
-				previousControlOutput = (int)Math.round(controlOutput);
 				compass.repaint();
 				try {
-					MyThread.sleep(200);
+					MyThread.sleep(1000);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -197,6 +198,7 @@ public class Navigation {
 			resetButtons(original, setCourse);
 			label.setText("" + ((JSlider) e.getSource()).getValue()+"deg");
 			reference( ((JSlider) e.getSource()).getValue());
+			Navigation.isCourseSet = false;
 			compass.repaint();});
 		// Adding a change listener to the slider to update the label when the slider value changes
 		absoluteHeading.addChangeListener(e -> {
@@ -209,15 +211,22 @@ public class Navigation {
 
 		// Adding a change listener to the slider to update the label when the slider value changes
 		rudder.addChangeListener(e -> {
-			resetButtons(original, setCourse);
+			//resetButtons(original, setCourse);
 			commonlabel.setText("" + ((JSlider) e.getSource()).getValue()+"deg");
-			Navigation.isCourseSet = false;
+			//Navigation.isCourseSet = false;
 			compass.repaint();
 		});
 		setCourse.addActionListener(e -> {
-			resetButtons(original, setCourse);
-			setCourse.setBackground(Color.GREEN);
 			Navigation.isCourseSet = !Navigation.isCourseSet;
+			if (!isCourseSet)
+				resetButtons(original, setCourse);
+			else {
+				setCourse.setBackground(Color.GREEN);
+				course( absoluteHeading.getValue());
+				pidController = new PIDControllerAngle(0.1, 0.01, 0.05);
+				pidController.setSetpoint(coursebearing); // Set desired setpoint
+				previousControlOutput = null;
+		}
 			compass.repaint();
 		});
 

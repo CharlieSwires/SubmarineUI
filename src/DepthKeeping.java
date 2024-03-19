@@ -37,6 +37,10 @@ public class DepthKeeping {
 	private static JButton dive = new JButton("Dive");
 	private static JButton alterDepth = new JButton("Alter Depth");
 	private static Color original = crashDive.getBackground();
+	private static double controlOutput = 0.0;
+	private static PIDControllerAngle pidController = new PIDControllerAngle(0.1, 0.01, 0.05);
+	private static Integer previousControlOutput = null;
+
 	private static JPanel diveAngleGauge = new JPanel() {
 		@Override
 		protected void paintComponent(Graphics g) {
@@ -54,7 +58,7 @@ public class DepthKeeping {
 					120+100+10-(int)(100*Math.cos((+180)/(180.0/Math.PI))));
 			g.drawChars(("Actual Depth:"+getDepth()+"mm    ").toCharArray(), 0, 20, -60+100+(int)(100*Math.sin((+180)/(180.0/Math.PI))), 
 					120+100+30-(int)(100*Math.cos((+180)/(180.0/Math.PI))));
-			if (success == false) {
+			if (!isDiveAngleSet && !isAlterDepthAngleSet && !success) {
 				g.setColor(Color.RED);
 				g.drawChars(("ERROR"+"     ").toCharArray(), 0, 10, -60+100+(int)(100*Math.sin((+180)/(180.0/Math.PI))), 
 						140+100+30-(int)(100*Math.cos((+180)/(180.0/Math.PI))));
@@ -74,10 +78,13 @@ public class DepthKeeping {
 				g.drawChars((error+"        ").toCharArray(), 0, 20, -60+100+(int)(100*Math.sin((+180)/(180.0/Math.PI))), 
 						160+100+30-(int)(100*Math.cos((+180)/(180.0/Math.PI))));
 			}
-			if (!isDiveAngleSet) {
-				g.setColor(Color.RED);
-			} else {
+			g.setColor(Color.BLACK);
+			g.drawChars(("Plane Angle: "+ controlOutput+"       ").toCharArray(), 0, 20, -60+100+(int)(100*Math.sin((+180)/(180.0/Math.PI))), 
+					180+100+30-(int)(100*Math.cos((+180)/(180.0/Math.PI))));
+			if ((isDiveAngleSet || isAlterDepthAngleSet) && success) {
 				g.setColor(Color.GREEN);
+			} else {
+				g.setColor(Color.RED);
 			}
 
 			g.drawLine(10+100, 120+100, 
@@ -94,6 +101,7 @@ public class DepthKeeping {
 	private static Boolean quickControls(DepthKeeping.EMERGENCY action, JSlider diveAngle, JSlider diveDepth) {
 		String url;
 		Boolean success = true;
+		int depth = getDepth();
 		switch (action) {
 		case SCUTTLE:
 			diveAngle.setValue(-45);
@@ -139,21 +147,25 @@ public class DepthKeeping {
 			break; 
 		case FREEZE:
 			diveAngle.setValue(0);
-			diveDepth.setValue(-getDepth()); //current depth
+			diveDepth.setValue(-depth); //current depth
 			allStop();
 			rudderZero();
 			break; 
 		case ALTER_DEPTH:
-			if ((diveDepth.getValue() < getDepth() && diveAngle.getValue() > 0) ||
-					(diveDepth.getValue() > getDepth() && diveAngle.getValue() < 0)) {
+			if ((diveDepth.getValue() < depth && diveAngle.getValue() < 0) ||
+					(diveDepth.getValue() > depth && diveAngle.getValue() > 0)) {
 				rudderZero();
-				success = true;
+				reference(diveAngle.getValue());
+				pidController = new PIDControllerAngle(0.1, 0.01, 0.05);
+				previousControlOutput = null;
+				isAlterDepthAngleSet = true;
 			} else {
-				success = false;
+				isAlterDepthAngleSet = false;
+				success =false;
 			}
 			break; 
 		case DIVE:
-			if (-diveDepth.getValue() > -getDepth() && diveAngle.getValue() < 0) {
+			if (-diveDepth.getValue() > -depth && diveAngle.getValue() < 0) {
 				url = new String("/dive/fill-tank/true");
 				try {
 					GenericGet.getGeneric(url);
@@ -163,8 +175,13 @@ public class DepthKeeping {
 					e.printStackTrace();
 				}
 				rudderZero();
-				success = true;
+				reference(diveAngle.getValue());
+				pidController = new PIDControllerAngle(0.1, 0.01, 0.05);
+				previousControlOutput = null;
+				isDiveAngleSet = true;
+
 			} else {
+				isDiveAngleSet = false;
 				success = false;
 			}
 			break; 
@@ -259,21 +276,9 @@ public class DepthKeeping {
 
 		@Override
 		public void run() {
-			PIDControllerAngle pidController = new PIDControllerAngle(0.1, 0.01, 0.05);
-			pidController.setSetpoint(requiredAngle); // Set desired setpoint
-			Integer previousControlOutput = null;
 			while (true) {
 				String url;
 				Integer depth = getDepth();
-
-				if (isDiveAngleSet || isAlterDepthAngleSet)
-					if (requiredAngle < 0 && -depth >= -diveDepth.getValue()) {
-						requiredAngle = 0;
-						pidController.setSetpoint(requiredAngle); // Set desired setpoint
-					} else if (requiredAngle > 0 && depth >= diveDepth.getValue()) {
-						requiredAngle = 0;
-						pidController.setSetpoint(requiredAngle); // Set desired setpoint	
-					}
 				url = new String("/dive/dive-angle");
 				try {
 					actualAngle = GenericGet.getGeneric(url);
@@ -283,19 +288,30 @@ public class DepthKeeping {
 					error = COMMS_LOST;
 					continue;
 				}
-				double controlOutput = pidController.compute(actualAngle);
-				controlOutput = controlOutput > 45.0 ? 45.0 : controlOutput;
-				controlOutput = controlOutput < -45.0 ? -45.0 : controlOutput;
-				if (previousControlOutput != null && Math.round(controlOutput) != (Integer)previousControlOutput) {
-					url = new String("/dive/front/"+((int)Math.round(controlOutput)));
-					url = new String("/dive/back/"+((int)Math.round(-controlOutput)));
-					Integer result = GenericGet.getGeneric(url);
+				if ((isDiveAngleSet || isAlterDepthAngleSet) && success) {
+					if (requiredAngle < 0 && -depth >= -diveDepth.getValue()) {
+						requiredAngle = 0;
+					} else if (requiredAngle > 0 && depth >= diveDepth.getValue()) {
+						requiredAngle = 0;
+					}
+					pidController.setSetpoint(requiredAngle); // Set desired setpoint
+
+					double tempControlO = pidController.compute(actualAngle);
+					tempControlO = tempControlO > 45.0 ? 45.0 : tempControlO;
+					tempControlO = tempControlO < -45.0 ? -45.0 : tempControlO;
+					controlOutput = tempControlO;
+					if (previousControlOutput != null && Math.round(controlOutput) != (Integer)previousControlOutput) {
+						url = new String("/dive/front/"+((int)Math.round(controlOutput)));
+						Integer result = GenericGet.getGeneric(url);
+						url = new String("/dive/back/"+((int)Math.round(-controlOutput)));
+						result = GenericGet.getGeneric(url);
+					}
+					previousControlOutput = (int)Math.round(controlOutput);
 				}
-				previousControlOutput = (int)Math.round(controlOutput);
 				diveAngleGauge.repaint();
 
 				try {
-					MyThread.sleep(200);
+					MyThread.sleep(500);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

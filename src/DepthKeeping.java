@@ -114,9 +114,7 @@ public class DepthKeeping {
 				error = COMMS_LOST;
 				e.printStackTrace();
 			}
-			reference(diveAngle.getValue());
-			pidController = new PIDControllerAngle(0.1, 0.01, 0.05);
-			previousControlOutput = null;
+			newPid(diveAngle.getValue());
 			isAlterDepthAngleSet = true;
 			allFull();
 			rudderZero();
@@ -132,9 +130,7 @@ public class DepthKeeping {
 				error = COMMS_LOST;
 				e.printStackTrace();
 			}
-			reference(diveAngle.getValue());
-			pidController = new PIDControllerAngle(0.1, 0.01, 0.05);
-			previousControlOutput = null;
+			newPid(diveAngle.getValue());
 			isAlterDepthAngleSet = true;
 			allFull();
 			rudderZero();
@@ -150,9 +146,7 @@ public class DepthKeeping {
 				error = COMMS_LOST;
 				e.printStackTrace();
 			}
-			reference(diveAngle.getValue());
-			pidController = new PIDControllerAngle(0.1, 0.01, 0.05);
-			previousControlOutput = null;
+			newPid(diveAngle.getValue());
 			isAlterDepthAngleSet = true;
 			allFull();
 			rudderZero();
@@ -160,9 +154,7 @@ public class DepthKeeping {
 		case FREEZE:
 			diveAngle.setValue(0);
 			diveDepth.setValue(-depth); //current depth
-			reference(diveAngle.getValue());
-			pidController = new PIDControllerAngle(0.1, 0.01, 0.05);
-			previousControlOutput = null;
+			newPid(diveAngle.getValue());
 			isAlterDepthAngleSet = true;
 			allStop();
 			rudderZero();
@@ -171,9 +163,7 @@ public class DepthKeeping {
 			if ((diveDepth.getValue() < depth && diveAngle.getValue() < 0) ||
 					(diveDepth.getValue() > depth && diveAngle.getValue() > 0)) {
 				rudderZero();
-				reference(diveAngle.getValue());
-				pidController = new PIDControllerAngle(0.1, 0.01, 0.05);
-				previousControlOutput = null;
+				newPid(diveAngle.getValue());
 				isAlterDepthAngleSet = true;
 			} else {
 				isAlterDepthAngleSet = false;
@@ -191,9 +181,7 @@ public class DepthKeeping {
 					e.printStackTrace();
 				}
 				rudderZero();
-				reference(diveAngle.getValue());
-				pidController = new PIDControllerAngle(0.1, 0.01, 0.05);
-				previousControlOutput = null;
+				newPid(diveAngle.getValue());
 				isDiveAngleSet = true;
 
 			} else {
@@ -206,7 +194,11 @@ public class DepthKeeping {
 		}
 		return success;
 	}
-
+	private static void newPid(int diveAngle) {
+		reference(diveAngle);
+		pidController = new PIDControllerAngle(0.1, 0.01, 0.05);
+		previousControlOutput = null;
+	}
 	private static void allFull() {
 		String url;
 		url = new String("/engine/right/" + 100);

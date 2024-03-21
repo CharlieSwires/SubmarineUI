@@ -2,6 +2,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.net.URI;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -383,12 +384,12 @@ public class DepthKeeping {
 		frame.add(rightpanel, BorderLayout.EAST);
 		JLabel leftTitle = new JLabel("REQUIRED ANGLE", SwingConstants.LEFT);
 		JLabel middleTitle = new JLabel("ACTUAL ANGLE", SwingConstants.CENTER);
-		JLabel rightTitle = new JLabel("DEPTH", SwingConstants.RIGHT);
+		JButton offsetButton = new JButton("Zero D");
 		JPanel toppanel = new JPanel();
 		toppanel.add(crashDive);
 		toppanel.add(leftTitle);
 		toppanel.add(middleTitle);
-		toppanel.add(rightTitle);
+		toppanel.add(offsetButton);
 		toppanel.add(scuttle);
 
 		// Adding the panel to the frame
@@ -439,6 +440,25 @@ public class DepthKeeping {
 			}
 			diveAngleGauge.repaint();
 		});
+		offsetButton.addActionListener(e -> {
+			String url  = ("/dive/depth");
+			int zeroDepth = 0;
+			try {
+				zeroDepth = GenericGet.getGeneric(url+"/"+zeroDepth);
+				error = COMMS_OK;
+			} catch (RuntimeException e1) { //need something other end, if COMMS_LOST this won't work.
+				error = COMMS_LOST;
+				e1.printStackTrace();
+			}
+			try {
+				GenericGet.getGeneric(url+"/"+zeroDepth);
+				error = COMMS_OK;
+			} catch (RuntimeException e1) { //need something other end, if COMMS_LOST this won't work.
+				error = COMMS_LOST;
+				e1.printStackTrace();
+			}
+		});
+
 		alterDepth.addActionListener(e -> {
 			isAlterDepthAngleSet = !isAlterDepthAngleSet;
 			if (!isAlterDepthAngleSet) {

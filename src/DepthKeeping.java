@@ -383,7 +383,7 @@ public class DepthKeeping {
 		// Adding the panel to the frame
 		frame.add(rightpanel, BorderLayout.EAST);
 		JLabel leftTitle = new JLabel("REQUIRED ANGLE", SwingConstants.LEFT);
-		JLabel middleTitle = new JLabel("ACTUAL ANGLE", SwingConstants.CENTER);
+		JLabel middleTitle = new JLabel("DEPTH", SwingConstants.CENTER);
 		JButton offsetButton = new JButton("Zero D");
 		JPanel toppanel = new JPanel();
 		toppanel.add(crashDive);

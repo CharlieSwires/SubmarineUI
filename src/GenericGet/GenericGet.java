@@ -57,6 +57,11 @@ public class GenericGet {
 
 			} catch (Exception  e2) {
 				retryCount--;
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+
+				}
 			}
 		} //end retry while
 		throw new RuntimeException("Retried and failed 5 times!!");

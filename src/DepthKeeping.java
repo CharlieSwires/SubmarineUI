@@ -80,7 +80,7 @@ public class DepthKeeping {
 						160+100+30-(int)(100*Math.cos((+180)/(180.0/Math.PI))));
 			}
 			g.setColor(Color.BLACK);
-			g.drawChars(("Plane Angle: "+ controlOutput+"       ").toCharArray(), 0, 20, -60+100+(int)(100*Math.sin((+180)/(180.0/Math.PI))), 
+			g.drawChars(("Plane Angle: "+ Math.round(controlOutput)+"degrees       ").toCharArray(), 0, 25, -60+100+(int)(100*Math.sin((+180)/(180.0/Math.PI))), 
 					180+100+30-(int)(100*Math.cos((+180)/(180.0/Math.PI))));
 			if ((isDiveAngleSet || isAlterDepthAngleSet) && success) {
 				g.setColor(Color.GREEN);

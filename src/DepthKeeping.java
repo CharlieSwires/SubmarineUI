@@ -384,7 +384,7 @@ public class DepthKeeping {
 		frame.add(rightpanel, BorderLayout.EAST);
 		JLabel leftTitle = new JLabel("REQUIRED ANGLE", SwingConstants.LEFT);
 		JLabel middleTitle = new JLabel("DEPTH", SwingConstants.CENTER);
-		JButton offsetButton = new JButton("Zero D");
+		JButton offsetButton = new JButton("Zero");
 		JPanel toppanel = new JPanel();
 		toppanel.add(crashDive);
 		toppanel.add(leftTitle);
@@ -441,17 +441,9 @@ public class DepthKeeping {
 			diveAngleGauge.repaint();
 		});
 		offsetButton.addActionListener(e -> {
-			String url  = ("/dive/depth");
-			int zeroDepth = 0;
+			String url  = ("/dive/zero");
 			try {
-				zeroDepth = GenericGet.getGeneric(url+"/"+zeroDepth);
-				error = COMMS_OK;
-			} catch (RuntimeException e1) { //need something other end, if COMMS_LOST this won't work.
-				error = COMMS_LOST;
-				e1.printStackTrace();
-			}
-			try {
-				GenericGet.getGeneric(url+"/"+zeroDepth);
+				GenericGet.getGeneric(url);
 				error = COMMS_OK;
 			} catch (RuntimeException e1) { //need something other end, if COMMS_LOST this won't work.
 				error = COMMS_LOST;

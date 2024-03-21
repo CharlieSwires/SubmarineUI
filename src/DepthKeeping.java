@@ -320,7 +320,7 @@ public class DepthKeeping {
 				diveAngleGauge.repaint();
 
 				try {
-					MyThread.sleep(500);
+					MyThread.sleep(1000);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

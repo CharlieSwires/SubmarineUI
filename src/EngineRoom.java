@@ -155,7 +155,7 @@ public class EngineRoom {
 				newRightSlider = rightslider.getValue();
 				//10Hz
 				try {
-					MyThread.sleep(200);
+					MyThread.sleep(500);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

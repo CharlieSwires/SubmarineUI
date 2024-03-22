@@ -53,7 +53,7 @@ public class Navigation {
 					120+100-(int)(100*Math.cos((relative+coursebearing)/(180.0/Math.PI))));
 			g.setColor(Color.BLACK);
 			g.drawChars(("Bearing: "+(bearing < 0 ? 360 + bearing : bearing)+"degrees         ").toCharArray(), 0, 25, -60+100+(int)(100*Math.sin((+180)/(180.0/Math.PI))), 
-					140+100+30-(int)(100*Math.cos((+180)/(180.0/Math.PI))));
+					120+100+30-(int)(100*Math.cos((+180)/(180.0/Math.PI))));
 
 		}
 	};

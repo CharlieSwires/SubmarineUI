@@ -20,7 +20,7 @@ public class GenericGet {
 		URL url = null;
 		try {
 			url = new URL(Constant.PI_HOME+Constant.PORT+Constant.PATH_PREFIX+suffix);
-			//System.out.print(url.toString());
+			System.out.print(url.toString());
 		} catch (MalformedURLException e1) {
 			e1.printStackTrace();
 			throw new RuntimeException(e1);
@@ -51,7 +51,7 @@ public class GenericGet {
 				rvalue = Integer.parseInt(inString.toString());
 
 				conn.disconnect();
-				//System.out.println(":"+rvalue);
+				System.out.println(":"+rvalue);
 				retryCount = 5;
 				return rvalue;
 

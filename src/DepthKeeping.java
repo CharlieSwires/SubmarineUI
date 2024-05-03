@@ -16,8 +16,8 @@ import GenericGet.GenericGet;
 import pid.PIDControllerAngle;
 
 public class DepthKeeping {
-	public enum EMERGENCY {
-		SCUTTLE, CRASH_DIVE, EMERGENCY_SURFACE, FREEZE, ALTER_DEPTH, DIVE
+	public enum INSTRUCTION {
+		SURFACE, CRASH_DIVE, EMERGENCY_SURFACE, FREEZE, ALTER_DEPTH, DIVE
 	}
 	private static boolean isDiveAngleSet = false;
 	private static boolean isAlterDepthAngleSet = false;
@@ -33,7 +33,7 @@ public class DepthKeeping {
 	private static JSlider diveAngle = new JSlider(JSlider.VERTICAL, -45, 45, 0); // Arguments: orientation, min, max, initial value
 	private static JButton emergencySurface = new JButton("Emergency Surface");
 	private static JButton crashDive = new JButton("Crash Dive");
-	private static JButton scuttle = new JButton("Scuttle");
+	private static JButton surface = new JButton("Surface");
 	private static JButton freeze = new JButton("Freeze");
 	private static JButton dive = new JButton("Dive");
 	private static JButton alterDepth = new JButton("Alter Depth");
@@ -99,25 +99,28 @@ public class DepthKeeping {
 		requiredAngle = value;		
 	}
 
-	private static Boolean quickControls(DepthKeeping.EMERGENCY action, JSlider diveAngle, JSlider diveDepth, Integer depth) {
+	private static Boolean quickControls(DepthKeeping.INSTRUCTION action, JSlider diveAngle, JSlider diveDepth, Integer depth) {
 		String url;
 		Boolean success = true;
 		switch (action) {
-		case SCUTTLE:
-			diveAngle.setValue(-45);
-			diveDepth.setValue(-100000); //100m
-			url = new String("/dive/fill-tank/true");
-			try {
-				GenericGet.getGeneric(url);
-				error = COMMS_OK;
-			} catch (RuntimeException e) { //need something other end, if COMMS_LOST this won't work.
-				error = COMMS_LOST;
-				e.printStackTrace();
+		case SURFACE:
+			if (diveDepth.getValue() > depth && diveAngle.getValue() > 0) {
+				url = new String("/dive/fill-tank/false");
+				try {
+					GenericGet.getGeneric(url);
+					error = COMMS_OK;
+				} catch (RuntimeException e) { //need something other end, if COMMS_LOST this won't work.
+					error = COMMS_LOST;
+					e.printStackTrace();
+				}
+				newPid(diveAngle.getValue());
+				isAlterDepthAngleSet = true;
+				allFull();
+				rudderZero();
+			} else {
+				isAlterDepthAngleSet = false;
+				success =false;
 			}
-			newPid(diveAngle.getValue());
-			isAlterDepthAngleSet = true;
-			allFull();
-			rudderZero();
 			break;
 		case CRASH_DIVE:
 			diveAngle.setValue(-45);
@@ -261,8 +264,8 @@ public class DepthKeeping {
 			error = COMMS_OK;
 		} catch (RuntimeException e) { //need something other end, if COMMS_LOST this won't work.
 			error = COMMS_LOST;
-			resetButtons(original, crashDive, scuttle, emergencySurface,freeze,dive,alterDepth);
-			success = quickControls(EMERGENCY.EMERGENCY_SURFACE, diveAngle, diveDepth, depth);
+			resetButtons(original, crashDive, surface, emergencySurface,freeze,dive,alterDepth);
+			success = quickControls(INSTRUCTION.EMERGENCY_SURFACE, diveAngle, diveDepth, depth);
 			emergencySurface.setBackground(Color.GREEN);
 			try {
 				Thread.sleep(1000);
@@ -393,7 +396,7 @@ public class DepthKeeping {
 		toppanel.add(leftTitle);
 		toppanel.add(middleTitle);
 		toppanel.add(offsetButton);
-		toppanel.add(scuttle);
+		toppanel.add(surface);
 
 		// Adding the panel to the frame
 		frame.add(toppanel, BorderLayout.NORTH);
@@ -406,30 +409,30 @@ public class DepthKeeping {
 		frame.add(bottompanel, BorderLayout.SOUTH);
 		// Adding a change listener to the slider to update the label when the slider value changes
 		diveAngle.addChangeListener(e -> {
-			resetButtons(original, crashDive, scuttle, emergencySurface,freeze,dive,alterDepth);
+			resetButtons(original, crashDive, surface, emergencySurface,freeze,dive,alterDepth);
 			label.setText("" + ((JSlider) e.getSource()).getValue()+"degrees");
 			reference( ((JSlider) e.getSource()).getValue());
 			diveAngleGauge.repaint();});
 		// Adding a change listener to the slider to update the label when the slider value changes
 		diveDepth.addChangeListener(e -> {
-			resetButtons(original, crashDive, scuttle, emergencySurface,freeze,dive,alterDepth);
+			resetButtons(original, crashDive, surface, emergencySurface,freeze,dive,alterDepth);
 			rightlabel.setText("" + (-((JSlider) e.getSource()).getValue())+"mm");
 			diveAngleGauge.repaint();});
 		crashDive.addActionListener(e -> {
-			resetButtons(original, crashDive, scuttle, emergencySurface,freeze,dive,alterDepth);
-			success = quickControls(EMERGENCY.CRASH_DIVE, diveAngle, diveDepth, depth);
+			resetButtons(original, crashDive, surface, emergencySurface,freeze,dive,alterDepth);
+			success = quickControls(INSTRUCTION.CRASH_DIVE, diveAngle, diveDepth, depth);
 			crashDive.setBackground(Color.GREEN);});
-		scuttle.addActionListener(e -> {
-			resetButtons(original, crashDive, scuttle, emergencySurface,freeze,dive,alterDepth);
-			success = quickControls(EMERGENCY.SCUTTLE, diveAngle, diveDepth, depth);
-			scuttle.setBackground(Color.GREEN);});
+		surface.addActionListener(e -> {
+			resetButtons(original, crashDive, surface, emergencySurface,freeze,dive,alterDepth);
+			success = quickControls(INSTRUCTION.SURFACE, diveAngle, diveDepth, depth);
+			surface.setBackground(Color.GREEN);});
 		emergencySurface.addActionListener(e -> {
-			resetButtons(original, crashDive, scuttle, emergencySurface,freeze,dive,alterDepth);
-			success = quickControls(EMERGENCY.EMERGENCY_SURFACE, diveAngle, diveDepth, depth);
+			resetButtons(original, crashDive, surface, emergencySurface,freeze,dive,alterDepth);
+			success = quickControls(INSTRUCTION.EMERGENCY_SURFACE, diveAngle, diveDepth, depth);
 			emergencySurface.setBackground(Color.GREEN);});
 		freeze.addActionListener(e -> {
-			resetButtons(original, crashDive, scuttle, emergencySurface,freeze,dive,alterDepth);
-			success = quickControls(EMERGENCY.FREEZE, diveAngle, diveDepth, depth);
+			resetButtons(original, crashDive, surface, emergencySurface,freeze,dive,alterDepth);
+			success = quickControls(INSTRUCTION.FREEZE, diveAngle, diveDepth, depth);
 			freeze.setBackground(Color.GREEN);});
 		dive.addActionListener(e -> {
 			isDiveAngleSet = !isDiveAngleSet;
@@ -437,8 +440,8 @@ public class DepthKeeping {
 				dive.setBackground(original);
 				success = true;
 			} else {
-				resetButtons(original, crashDive, scuttle, emergencySurface,freeze,dive,alterDepth);
-				success = quickControls(EMERGENCY.DIVE, diveAngle, diveDepth, depth);
+				resetButtons(original, crashDive, surface, emergencySurface,freeze,dive,alterDepth);
+				success = quickControls(INSTRUCTION.DIVE, diveAngle, diveDepth, depth);
 				dive.setBackground(Color.GREEN);
 			}
 			diveAngleGauge.repaint();
@@ -460,8 +463,8 @@ public class DepthKeeping {
 				alterDepth.setBackground(original);
 				success = true;
 			} else {
-				resetButtons(original, crashDive, scuttle, emergencySurface,freeze,dive,alterDepth);
-				success = quickControls(EMERGENCY.ALTER_DEPTH, diveAngle, diveDepth, depth);
+				resetButtons(original, crashDive, surface, emergencySurface,freeze,dive,alterDepth);
+				success = quickControls(INSTRUCTION.ALTER_DEPTH, diveAngle, diveDepth, depth);
 				alterDepth.setBackground(Color.GREEN);
 			}
 			diveAngleGauge.repaint();

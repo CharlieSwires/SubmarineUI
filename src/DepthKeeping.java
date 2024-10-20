@@ -12,6 +12,7 @@ import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.SwingConstants;
 
+import Const.Constant;
 import GenericGet.GenericGet;
 import pid.PIDControllerAngle;
 
@@ -326,7 +327,7 @@ public class DepthKeeping {
 				diveAngleGauge.repaint();
 
 				try {
-					MyThread.sleep(1000);
+					MyThread.sleep(Constant.tick_ms);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

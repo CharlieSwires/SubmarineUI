@@ -53,9 +53,16 @@ public class Navigation {
 			g.drawLine(10+100, 120+100, 
 					10+100+(int)(100*Math.sin((relative+coursebearing)/(180.0/Math.PI))), 
 					120+100-(int)(100*Math.cos((relative+coursebearing)/(180.0/Math.PI))));
-			g.setColor(Color.BLACK);
+			if (bearing == Constant.ERROR) {
+				g.setColor(Color.RED);
+				bearing = 0;
+			} else {
+				g.setColor(Color.BLACK);
+			}
 			g.drawChars(("Bearing: "+(bearing < 0 ? 360 + bearing : bearing)+"degrees         ").toCharArray(), 0, 25, -60+100+(int)(100*Math.sin((+180)/(180.0/Math.PI))), 
 					120+100+30-(int)(100*Math.cos((+180)/(180.0/Math.PI))));
+			g.setColor(Color.BLACK);
+
 
 		}
 	};

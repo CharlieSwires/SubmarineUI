@@ -8,5 +8,6 @@ public class Constant {
 	public static final String PORT = ":8080";
 	public static final String PATH_PREFIX = "/submarine";
 	public static Integer tick_ms = 500;
+	public static final int ERROR = -999999;
 
 }

@@ -70,13 +70,25 @@ public class EngineRoom {
 				url = new String("/engine/cpu-temp");
 				try {
 					Integer result = GenericGet.getGeneric(url);
-					frame.setTitle("Engine Room temp=" + (result/10.0) + "Celcius");
-					leftTitle.setForeground(originalColour);
-					middleTitle.setForeground(originalColour);
-					rightTitle.setForeground(originalColour);
-					leftTitle.setText("LEFT");
-					middleTitle.setText("COMMON");
-					rightTitle.setText("RIGHT");
+					if (result == Constant.ERROR) {
+						frame.setForeground(Color.RED);
+						frame.setTitle("Engine Room temp=" + (result/10.0) + "Celcius");
+						leftTitle.setForeground(Color.RED);
+						middleTitle.setForeground(Color.RED);
+						rightTitle.setForeground(Color.RED);
+						leftTitle.setText("ERROR");
+						middleTitle.setText("READING");
+						rightTitle.setText("VALUE");
+					} else {
+						frame.setForeground(Color.BLACK);
+						frame.setTitle("Engine Room temp=" + (result/10.0) + "Celcius");
+						leftTitle.setForeground(originalColour);
+						middleTitle.setForeground(originalColour);
+						rightTitle.setForeground(originalColour);
+						leftTitle.setText("LEFT");
+						middleTitle.setText("COMMON");
+						rightTitle.setText("RIGHT");						
+					}
 				} catch (RuntimeException e) {
 					leftTitle.setForeground(Color.RED);
 					middleTitle.setForeground(Color.RED);
@@ -111,12 +123,21 @@ public class EngineRoom {
 					url = new String("/engine/left/" + newSlider);
 					try {
 						Integer result = GenericGet.getGeneric(url);
-						leftTitle.setForeground(originalColour);
-						middleTitle.setForeground(originalColour);
-						rightTitle.setForeground(originalColour);
-						leftTitle.setText("LEFT");
-						middleTitle.setText("COMMON");
-						rightTitle.setText("RIGHT");
+						if (result == Constant.ERROR) {
+							leftTitle.setForeground(Color.RED);
+							middleTitle.setForeground(Color.RED);
+							rightTitle.setForeground(Color.RED);
+							leftTitle.setText("ERROR");
+							middleTitle.setText("IN");
+							rightTitle.setText("SENSOR");
+						} else {
+							leftTitle.setForeground(originalColour);
+							middleTitle.setForeground(originalColour);
+							rightTitle.setForeground(originalColour);
+							leftTitle.setText("LEFT");
+							middleTitle.setText("COMMON");
+							rightTitle.setText("RIGHT");
+						}
 					} catch (RuntimeException e) {
 						leftTitle.setForeground(Color.RED);
 						middleTitle.setForeground(Color.RED);
@@ -135,12 +156,21 @@ public class EngineRoom {
 					url = new String("/engine/right/" + newRightSlider);
 					try {
 						Integer result = GenericGet.getGeneric(url);
-						leftTitle.setForeground(originalColour);
-						middleTitle.setForeground(originalColour);
-						rightTitle.setForeground(originalColour);
-						leftTitle.setText("LEFT");
-						middleTitle.setText("COMMON");
-						rightTitle.setText("RIGHT");
+						if (result == Constant.ERROR) {
+							leftTitle.setForeground(Color.RED);
+							middleTitle.setForeground(Color.RED);
+							rightTitle.setForeground(Color.RED);
+							leftTitle.setText("ERROR");
+							middleTitle.setText("IN");
+							rightTitle.setText("SENSOR");
+						} else {
+							leftTitle.setForeground(originalColour);
+							middleTitle.setForeground(originalColour);
+							rightTitle.setForeground(originalColour);
+							leftTitle.setText("LEFT");
+							middleTitle.setText("COMMON");
+							rightTitle.setText("RIGHT");
+						}
 					} catch (RuntimeException e) {
 						leftTitle.setForeground(Color.RED);
 						middleTitle.setForeground(Color.RED);

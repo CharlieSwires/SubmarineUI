@@ -47,18 +47,35 @@ public class DepthKeeping {
 		@Override
 		protected void paintComponent(Graphics g) {
 			super.paintComponent(g);
-			int angle = DepthKeeping.actualAngle;
+			int angle = DepthKeeping.actualAngle;			
+			g.setColor(Color.BLACK);
 			g.drawArc(10, 120, 200, 200, 0, 360);
+			if (angle == Constant.ERROR) {
+				g.setColor(Color.RED);
+				angle = -90;
+			}
+			else {
+				g.setColor(Color.BLACK);
+			}
 			g.drawLine(10+100, 120+100, 
 					10+100+(int)(100*Math.sin((-angle+90)/(180.0/Math.PI))), 
 					120+100-(int)(100*Math.cos((-angle+90)/(180.0/Math.PI))));
+			g.setColor(Color.BLACK);
 			g.drawChars("+90".toCharArray(), 0, 3, 10+100+(int)(100*Math.sin((0)/(180.0/Math.PI))), 
 					120+100-(int)(100*Math.cos((0)/(180.0/Math.PI))));
 			g.drawChars("0".toCharArray(), 0, 1, 10+100+(int)(100*Math.sin((0+90)/(180.0/Math.PI))), 
 					120+100-(int)(100*Math.cos((+90)/(180.0/Math.PI))));
 			g.drawChars("-90".toCharArray(), 0, 3, 10+100+(int)(100*Math.sin((+180)/(180.0/Math.PI))), 
 					120+100+10-(int)(100*Math.cos((+180)/(180.0/Math.PI))));
-			g.drawChars(("Actual Depth:"+getDepth()+"mm    ").toCharArray(), 0, 20, -60+100+(int)(100*Math.sin((+180)/(180.0/Math.PI))), 
+			depth = getDepth();
+			if (depth == Constant.ERROR) {
+				g.setColor(Color.RED);
+				depth = 0;
+			}
+			else {
+				g.setColor(Color.BLACK);
+			}
+			g.drawChars(("Actual Depth:"+depth+"mm    ").toCharArray(), 0, 20, -60+100+(int)(100*Math.sin((+180)/(180.0/Math.PI))), 
 					120+100+30-(int)(100*Math.cos((+180)/(180.0/Math.PI))));
 			if (!isDiveAngleSet && !isAlterDepthAngleSet && !success) {
 				g.setColor(Color.RED);

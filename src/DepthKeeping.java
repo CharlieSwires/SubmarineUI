@@ -29,7 +29,7 @@ public class DepthKeeping {
 	private static final String COMMS_LOST = "COMMUNICATION LOST";
 	private static final String COMMS_OK = "COMMUNICATION OK";
 	// Creating the JSlider
-	private static JSlider diveDepth = new JSlider(JSlider.VERTICAL, -8000, 0, 0); // Arguments: orientation, min, max, initial value
+	private static JSlider diveDepth = new JSlider(JSlider.VERTICAL, -5000, 0, 0); // Arguments: orientation, min, max, initial value
 	// Creating the JSlider
 	private static JSlider diveAngle = new JSlider(JSlider.VERTICAL, -45, 45, 0); // Arguments: orientation, min, max, initial value
 	private static JButton emergencySurface = new JButton("Emergency Surface");
@@ -47,7 +47,7 @@ public class DepthKeeping {
 		@Override
 		protected void paintComponent(Graphics g) {
 			super.paintComponent(g);
-			int angle = DepthKeeping.actualAngle;			
+			int angle = (int)DepthKeeping.actualAngle;			
 			g.setColor(Color.BLACK);
 			g.drawArc(10, 120, 200, 200, 0, 360);
 			if (angle == Constant.ERROR) {

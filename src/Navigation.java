@@ -31,8 +31,8 @@ public class Navigation {
 		@Override
 		protected void paintComponent(Graphics g) {
 			super.paintComponent(g);
-			int bearing = Navigation.bearing;
-			int relative = Navigation.relative;
+			int bearing = (int)Navigation.bearing;
+			int relative = (int)Navigation.relative;
 			g.drawArc(10, 120, 200, 200, 0, 360);
 			g.drawLine(10+100, 120+100, 
 					10+100+(int)(100*Math.sin((relative+bearing)/(180.0/Math.PI))), 

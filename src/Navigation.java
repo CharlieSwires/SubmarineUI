@@ -104,6 +104,13 @@ public class Navigation {
 						}
 					}
 					previousControlOutput = (int)Math.round(controlOutput);
+				} else {
+					url = new String("/navigation/rudder/"+((int)rudder.getValue()));
+					try {
+						Integer result = GenericGet.getGeneric(url);
+					} catch (RuntimeException e) {
+						e.printStackTrace();
+					}
 				}
 				compass.repaint();
 				try {

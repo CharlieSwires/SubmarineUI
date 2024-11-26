@@ -123,6 +123,12 @@ public class DepthKeeping {
 				diveAngle.setForeground(Color.RED);
 			else
 				diveAngle.setForeground(Color.BLACK);
+			if (fillOk == Constant.ERROR)
+				g.setColor(Color.RED);
+			else 
+				g.setColor(Color.BLACK);
+			g.drawChars(("Tanks Full: "+ (fillOk == 1 ? "Yes":"No")+"       ").toCharArray(), 0, 25, -60+100+(int)(100*Math.sin((+180)/(180.0/Math.PI))), 
+					200+100+30-(int)(100*Math.cos((+180)/(180.0/Math.PI))));
 
 
 		}

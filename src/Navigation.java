@@ -13,7 +13,6 @@ import javax.swing.JSlider;
 import javax.swing.SwingConstants;
 
 import Const.Constant;
-
 import GenericGet.GenericGet;
 import pid.PIDControllerAngle;
 
@@ -24,6 +23,7 @@ public class Navigation {
 	private static Integer coursebearing = 0;
 	private static PIDControllerAngle pidController = new PIDControllerAngle(0.1, 0.01, 0.05);
 	private static Integer previousControlOutput = null;
+	private static Integer rudderAngle;
 
 	// Creating the JSlider
 	private static JSlider rudder = new JSlider(JSlider.HORIZONTAL, -45, 45, 0); // Arguments: orientation, min, max, initial value
@@ -63,7 +63,10 @@ public class Navigation {
 					120+100+30-(int)(100*Math.cos((+180)/(180.0/Math.PI))));
 			g.setColor(Color.BLACK);
 
-
+			if (rudderAngle == Constant.ERROR)
+				rudder.setForeground(Color.RED);
+			else 
+				rudder.setForeground(Color.BLACK);
 		}
 	};
 	private static void course(int value) {
@@ -98,7 +101,7 @@ public class Navigation {
 						rudder.setValue((int)Math.round(controlOutput));
 						url = new String("/navigation/rudder/"+((int)controlOutput));
 						try {
-							Integer result = GenericGet.getGeneric(url);
+							rudderAngle = GenericGet.getGeneric(url);
 						} catch (RuntimeException e) {
 							e.printStackTrace();
 						}
@@ -107,7 +110,7 @@ public class Navigation {
 				} else {
 					url = new String("/navigation/rudder/"+((int)rudder.getValue()));
 					try {
-						Integer result = GenericGet.getGeneric(url);
+						rudderAngle = GenericGet.getGeneric(url);
 					} catch (RuntimeException e) {
 						e.printStackTrace();
 					}

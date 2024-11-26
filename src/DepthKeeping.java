@@ -2,7 +2,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
-import java.net.URI;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -43,7 +42,13 @@ public class DepthKeeping {
 	private static PIDControllerAngle pidController = new PIDControllerAngle(0.1, 0.01, 0.05);
 	private static Integer previousControlOutput = null;
 	private static Integer depth = 0;
+	private static Integer fillOk;
+	private static Integer rudderAngle;
+	private static Integer requestedAngle;
+
+	
 	private static JPanel diveAngleGauge = new JPanel() {
+
 		@Override
 		protected void paintComponent(Graphics g) {
 			super.paintComponent(g);
@@ -97,9 +102,13 @@ public class DepthKeeping {
 				g.drawChars((error+"        ").toCharArray(), 0, 20, -60+100+(int)(100*Math.sin((+180)/(180.0/Math.PI))), 
 						160+100+30-(int)(100*Math.cos((+180)/(180.0/Math.PI))));
 			}
-			g.setColor(Color.BLACK);
+			if (requestedAngle == Constant.ERROR)
+				g.setColor(Color.RED);
+			else 
+				g.setColor(Color.BLACK);
 			g.drawChars(("Plane Angle: "+ Math.round(controlOutput)+"degrees       ").toCharArray(), 0, 25, -60+100+(int)(100*Math.sin((+180)/(180.0/Math.PI))), 
 					180+100+30-(int)(100*Math.cos((+180)/(180.0/Math.PI))));
+
 			if ((isDiveAngleSet || isAlterDepthAngleSet) && success) {
 				g.setColor(Color.GREEN);
 			} else {
@@ -109,6 +118,12 @@ public class DepthKeeping {
 			g.drawLine(10+100, 120+100, 
 					10+100+(int)(100*Math.sin((-requiredAngle+90)/(180.0/Math.PI))), 
 					120+100-(int)(100*Math.cos((-requiredAngle+90)/(180.0/Math.PI))));
+
+			if (requestedAngle == Constant.ERROR)
+				diveAngle.setForeground(Color.RED);
+			else
+				diveAngle.setForeground(Color.BLACK);
+
 
 		}
 	};
@@ -125,7 +140,7 @@ public class DepthKeeping {
 			if (diveDepth.getValue() > depth && diveAngle.getValue() > 0) {
 				url = new String("/dive/fill-tank/false");
 				try {
-					GenericGet.getGeneric(url);
+					DepthKeeping.fillOk = GenericGet.getGeneric(url);
 					error = COMMS_OK;
 				} catch (RuntimeException e) { //need something other end, if COMMS_LOST this won't work.
 					error = COMMS_LOST;
@@ -145,7 +160,7 @@ public class DepthKeeping {
 			diveDepth.setValue(-8000); //8m
 			url = new String("/dive/fill-tank/true");
 			try {
-				GenericGet.getGeneric(url);
+				DepthKeeping.fillOk = GenericGet.getGeneric(url);
 				error = COMMS_OK;
 			} catch (RuntimeException e) { //need something other end, if COMMS_LOST this won't work.
 				error = COMMS_LOST;
@@ -161,7 +176,7 @@ public class DepthKeeping {
 			diveDepth.setValue(0);
 			url = new String("/dive/fill-tank/false");
 			try {
-				GenericGet.getGeneric(url);
+				DepthKeeping.fillOk = GenericGet.getGeneric(url);
 				error = COMMS_OK;
 			} catch (RuntimeException e) { //need something other end, if COMMS_LOST this won't work.
 				error = COMMS_LOST;
@@ -195,7 +210,7 @@ public class DepthKeeping {
 			if (-diveDepth.getValue() > -depth && diveAngle.getValue() < 0) {
 				url = new String("/dive/fill-tank/true");
 				try {
-					GenericGet.getGeneric(url);
+					DepthKeeping.fillOk = GenericGet.getGeneric(url);
 					error = COMMS_OK;
 				} catch (RuntimeException e) { //need something other end, if COMMS_LOST this won't work.
 					error = COMMS_LOST;
@@ -244,7 +259,7 @@ public class DepthKeeping {
 		String url;
 		url = new String("/navigation/rudder/"+0);
 		try {
-			GenericGet.getGeneric(url);
+			DepthKeeping.rudderAngle = GenericGet.getGeneric(url);
 			error = COMMS_OK;
 		} catch (RuntimeException e) { //need something other end, if COMMS_LOST this won't work.
 			error = COMMS_LOST;
@@ -335,9 +350,9 @@ public class DepthKeeping {
 					controlOutput = tempControlO;
 					if (previousControlOutput != null && Math.round(controlOutput) != (Integer)previousControlOutput) {
 						url = new String("/dive/front/"+((int)Math.round(controlOutput)));
-						Integer result = GenericGet.getGeneric(url);
+						DepthKeeping.requestedAngle = GenericGet.getGeneric(url);
 						url = new String("/dive/back/"+((int)Math.round(-controlOutput)));
-						result = GenericGet.getGeneric(url);
+						DepthKeeping.requestedAngle = GenericGet.getGeneric(url);
 					}
 					previousControlOutput = (int)Math.round(controlOutput);
 				}
@@ -346,7 +361,6 @@ public class DepthKeeping {
 				try {
 					MyThread.sleep(Constant.tick_ms);
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}

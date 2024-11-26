@@ -157,7 +157,7 @@ public class DepthKeeping {
 			break;
 		case CRASH_DIVE:
 			diveAngle.setValue(-45);
-			diveDepth.setValue(-8000); //8m
+			diveDepth.setValue(-4000); //4m
 			url = new String("/dive/fill-tank/true");
 			try {
 				DepthKeeping.fillOk = GenericGet.getGeneric(url);

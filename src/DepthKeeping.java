@@ -41,6 +41,8 @@ public class DepthKeeping {
 	private static double controlOutput = 0.0;
 	private static PIDControllerAngle pidController = new PIDControllerAngle(0.1, 0.01, 0.05);
 	private static Integer previousControlOutput = null;
+	private static PIDControllerAngle pidDepthController = new PIDControllerAngle(0.1, 0.01, 0.05);
+	private static Integer previousDepthControlOutput = null;
 	private static Integer depth = 0;
 	private static Integer fillOk;
 	private static Integer rudderAngle;
@@ -344,12 +346,14 @@ public class DepthKeeping {
 					continue;
 				}
 				if ((isDiveAngleSet || isAlterDepthAngleSet) && success) {
-					if (requiredAngle < 0 && -depth >= -diveDepth.getValue()) {
-						requiredAngle = 0;
-					} else if (requiredAngle > 0 && depth >= diveDepth.getValue()) {
-						requiredAngle = 0;
-					}
-					pidController.setSetpoint(requiredAngle); // Set desired setpoint
+					pidDepthController.setSetpoint(diveDepth.getValue()); // Set desired setpoint
+					
+					double diveAngle = pidDepthController.compute(depth);
+
+					if (diveAngle < requiredAngle && requiredAngle < 0) diveAngle = requiredAngle;
+					if (diveAngle > requiredAngle && requiredAngle > 0) diveAngle = requiredAngle;
+					
+					pidController.setSetpoint(diveAngle); // Set desired setpoint
 
 					double tempControlO = pidController.compute(actualAngle);
 					tempControlO = tempControlO > 45.0 ? 45.0 : tempControlO;
@@ -362,6 +366,7 @@ public class DepthKeeping {
 						DepthKeeping.requestedAngle = GenericGet.getGeneric(url);
 					}
 					previousControlOutput = (int)Math.round(controlOutput);
+					previousDepthControlOutput = (int)Math.round(diveAngle);
 				}
 				diveAngleGauge.repaint();
 

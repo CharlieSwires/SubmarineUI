@@ -345,7 +345,7 @@ public class DepthKeeping {
 					error = COMMS_LOST;
 					continue;
 				}
-				if ((isDiveAngleSet || isAlterDepthAngleSet) && success) {
+				if ((isDiveAngleSet || isAlterDepthAngleSet) && success && depth != Constant.ERROR) {
 					pidDepthController.setSetpoint(diveDepth.getValue()); // Set desired setpoint
 					
 					double diveAngle = pidDepthController.compute(depth);

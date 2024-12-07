@@ -44,9 +44,9 @@ public class DepthKeeping {
 	private static PIDControllerAngle pidDepthController = new PIDControllerAngle(0.1, 0.01, 0.05);
 	private static Integer previousDepthControlOutput = null;
 	private static Integer depth = 0;
-	private static Integer fillOk;
-	private static Integer rudderAngle;
-	private static Integer requestedAngle;
+	private static Integer fillOk = 0;
+	private static Integer rudderAngle = 0;
+	private static Integer requestedAngle = 0;
 
 	
 	private static JPanel diveAngleGauge = new JPanel() {
@@ -130,7 +130,7 @@ public class DepthKeeping {
 				g.setColor(Color.RED);
 			else 
 				g.setColor(Color.BLACK);
-			g.drawChars(("Tanks Filling: "+ (fillOk == 1 ? "Yes":"No")+"       ").toCharArray(), 0, 25, -60+100+(int)(100*Math.sin((+180)/(180.0/Math.PI))), 
+			g.drawChars(("Tanks Filling: "+ (fillOk == 1 ? "Yes":"No")+"       ").toCharArray(), 0, 24, -60+100+(int)(100*Math.sin((+180)/(180.0/Math.PI))), 
 					200+100+30-(int)(100*Math.cos((+180)/(180.0/Math.PI))));
 
 

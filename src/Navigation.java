@@ -22,7 +22,7 @@ public class Navigation {
 	private static Integer coursebearing = 0;
 	private static PIDControllerAngle pidController = new PIDControllerAngle(0.1, 0.01, 0.05);
 	private static Integer previousControlOutput = null;
-	private static Integer rudderAngle;
+	private static Integer rudderAngle = 0;
 
 	// Creating the JSlider
 	private static JSlider rudder = new JSlider(JSlider.HORIZONTAL, -45, 45, 0); // Arguments: orientation, min, max, initial value

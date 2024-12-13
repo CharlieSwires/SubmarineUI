@@ -326,7 +326,7 @@ public class EngineRoom {
 
 	public Integer engineRight(Integer newRightSlider) {
 		Constant.gg.getGenericAsync(
-				"/engine/right"+newRightSlider,
+				"/engine/right/"+newRightSlider,
 				result -> {
 					engineRight = result;
 				},
@@ -339,7 +339,7 @@ public class EngineRoom {
 
 	public Integer setEngineLeft(Integer newSlider) {
 		Constant.gg.getGenericAsync(
-				"/engine/left"+newSlider,
+				"/engine/left/"+newSlider,
 				result -> {
 					engineLeft = result;
 				},

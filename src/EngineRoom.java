@@ -66,10 +66,8 @@ public class EngineRoom {
 		@Override
 		public void run() {
 			while (true) {
-				String url;
-				url = new String("/engine/cpu-temp");
 				try {
-					Integer result = GenericGet.getGeneric(url);
+					Integer result = getCPUTemp();
 					if (result == Constant.ERROR) {
 						frame.setForeground(Color.RED);
 						frame.setTitle("Engine Room temp=" + (result/10.0) + "Celcius");
@@ -119,10 +117,8 @@ public class EngineRoom {
 			while (true) {
 				//only when changed
 				if (previousSlider != null && !previousSlider.equals(newSlider)) {
-					String url;
-					url = new String("/engine/left/" + newSlider);
 					try {
-						Integer result = GenericGet.getGeneric(url);
+						Integer result = setEngineLeft(newSlider);;
 						if (result == Constant.ERROR) {
 							leftTitle.setForeground(Color.RED);
 							middleTitle.setForeground(Color.RED);
@@ -152,10 +148,8 @@ public class EngineRoom {
 
 				newSlider = slider.getValue();
 				if (previousRightSlider != null && !previousRightSlider.equals(newRightSlider)) {
-					String url;
-					url = new String("/engine/right/" + newRightSlider);
 					try {
-						Integer result = GenericGet.getGeneric(url);
+						Integer result = engineRight(newRightSlider);
 						if (result == Constant.ERROR) {
 							leftTitle.setForeground(Color.RED);
 							middleTitle.setForeground(Color.RED);
@@ -325,6 +319,48 @@ public class EngineRoom {
 		MyThreadTemperature t2 = er.new MyThreadTemperature();
 		t.start();
 		t2.start();
+	}
+	private static int engineLeft;
+	private static int engineRight;
+	private static int cpuTemp;
+
+	public Integer engineRight(Integer newRightSlider) {
+		Constant.gg.getGenericAsync(
+				"/engine/right"+newRightSlider,
+				result -> {
+					engineRight = result;
+				},
+				errorMessage -> {
+					throw new RuntimeException("NO COMMS");
+				}
+				);
+		return engineRight;	
+	}
+
+	public Integer setEngineLeft(Integer newSlider) {
+		Constant.gg.getGenericAsync(
+				"/engine/left"+newSlider,
+				result -> {
+					engineLeft = result;
+				},
+				errorMessage -> {
+					throw new RuntimeException("NO COMMS");
+				}
+				);
+		return engineLeft;	
+	}
+
+	public Integer getCPUTemp() {
+		Constant.gg.getGenericAsync(
+				"/engine/cpu-temp",
+				result -> {
+					cpuTemp = result;
+				},
+				errorMessage -> {
+					throw new RuntimeException("NO COMMS");
+				}
+				);
+		return cpuTemp;
 	}
 
 }

@@ -1,107 +1,86 @@
 package GenericGet;
 
-import java.awt.Image;
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.function.Consumer;
 
-import javax.imageio.ImageIO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import Const.Constant;
 
+
+
 public class GenericGet {
 
-	private static int retryCount = 5;
-	public static Integer getGeneric(String suffix) {
-		Integer rvalue = null;
-		URL url = null;
-		try {
-			url = new URL(Constant.PI_HOME+Constant.PORT+Constant.PATH_PREFIX+suffix);
-			System.out.print(url.toString());
-		} catch (MalformedURLException e1) {
-			e1.printStackTrace();
-			throw new RuntimeException(e1);
-		}
-		while (retryCount > 0 ) {
-			try {
+	private static final ExecutorService executor = Executors.newCachedThreadPool(); // Thread pool for async tasks
+	private static final int MAX_RETRIES = 5;
+    private static final int TIMEOUT_SECONDS = 5; // Timeout for each request
+    private static final Logger log = LoggerFactory.getLogger(GenericGet.class);
 
-				HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-				conn.setRequestMethod("GET");
-				conn.setRequestProperty("Accept", "application/json");
-				conn.setRequestProperty("Content-Type", "application/json");
+    public void getGenericAsync(String suffix, Consumer<Integer> onSuccess, Consumer<String> onError) {
+        executor.submit(() -> {
+            int retries = MAX_RETRIES;
+            while (retries > 0) {
+                Future<Integer> future = executor.submit(() -> {
+                    URL url = new URL(Constant.PI_HOME + Constant.PORT + Constant.PATH_PREFIX + suffix);
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setRequestMethod("GET");
+                    conn.setRequestProperty("Accept", "application/json");
+                    conn.setRequestProperty("Content-Type", "application/json");
 
-				if (conn.getResponseCode() != 200) {
-					throw new RuntimeException("Failed : HTTP error code : "
-							+ conn.getResponseCode());
-				}
+                    if (conn.getResponseCode() != 200) {
+                        throw new RuntimeException("HTTP error code: " + conn.getResponseCode());
+                    }
 
-				BufferedReader br = new BufferedReader(new InputStreamReader(
-						(conn.getInputStream())));
+                    try (BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
+                        StringBuilder inString = new StringBuilder();
+                        String output;
+                        while ((output = br.readLine()) != null) {
+                            inString.append(output);
+                        }
+                        conn.disconnect();
+                        return Integer.parseInt(inString.toString());
+                    }
+                });
 
-				String output;
-				StringBuffer inString = new StringBuffer();
+                try {
+                    Integer result = future.get(TIMEOUT_SECONDS, TimeUnit.SECONDS); // Enforce timeout
+                    onSuccess.accept(result);
+                    return; // Exit if successful
+                } catch (TimeoutException e) {
+                    future.cancel(true); // Cancel the task
+                    log.error("Request timed out after " + TIMEOUT_SECONDS + " seconds", e);
+                    retries--;
+                } catch (Exception e) {
+                    log.error("Error in HTTP request. Retries left: " + retries, e);
+                    retries--;
+                }
 
-				while ((output = br.readLine()) != null) {
-					inString.append(output);
-				}
-				//JSON from String to Object
-				rvalue = Integer.parseInt(inString.toString());
+                if (retries == 0) {
+                    onError.accept("Failed after " + MAX_RETRIES + " retries or timeout.");
+                }
 
-				conn.disconnect();
-				System.out.println(":"+rvalue);
-				retryCount = 5;
-				return rvalue;
+                try {
+                    Thread.sleep(1000); // Delay between retries
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    onError.accept("Thread interrupted: " + e.getMessage());
+                    return;
+                }
+            }
+        });
+    }
 
-			} catch (Exception  e2) {
-				retryCount--;
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-
-				}
-			}
-		} //end retry while
-		throw new RuntimeException("Retried and failed 5 times!!");
-
-	}
-	public static Image getImage(String suffix) {
-		URL url = null;
-		try {
-			url = new URL(Constant.PI_HOME + Constant.PORT + Constant.PATH_PREFIX + suffix);
-			//System.out.println("Requesting URL: " + url.toString());
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-			return null; // Return null if URL is malformed
-		}
-
-		HttpURLConnection conn = null;
-		try {
-			conn = (HttpURLConnection) url.openConnection();
-			conn.setRequestMethod("GET");
-			conn.setRequestProperty("Accept", "image/jpeg");
-			conn.setRequestProperty("Content-Type", "application/json");
-
-			if (conn.getResponseCode() != 200) {
-				throw new RuntimeException("Failed: HTTP error code : " + conn.getResponseCode());
-			}
-
-			// Use ImageIO to read the image directly from the InputStream
-			Image image = ImageIO.read(conn.getInputStream());
-
-			conn.disconnect(); // Disconnect after processing
-			return image; // Return the fetched image
-
-		} catch (IOException e) {
-			e.printStackTrace(); // Log exceptions
-		} finally {
-			if (conn != null) {
-				conn.disconnect(); // Ensure disconnection in case of an exception
-			}
-		}
-		return null; // Return null if the process fails
-	}
+    public void shutdown() {
+        executor.shutdown();
+    }
 
 }

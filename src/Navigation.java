@@ -88,7 +88,7 @@ public class Navigation {
 				String url;
 				url = new String("/navigation/bearing");
 				try {
-					Navigation.bearing = GenericGet.getGeneric(url);
+					Navigation.bearing = getBearing();
 				} catch (RuntimeException e) {
 					e.printStackTrace();
 				}
@@ -98,21 +98,11 @@ public class Navigation {
 					controlOutput = controlOutput < -45.0 ? -45.0 : controlOutput;
 					if (previousControlOutput != null && Math.round(controlOutput) != (Integer)previousControlOutput) {
 						rudder.setValue((int)Math.round(controlOutput));
-						url = new String("/navigation/rudder/"+((int)controlOutput));
-						try {
-							rudderAngle = GenericGet.getGeneric(url);
-						} catch (RuntimeException e) {
-							e.printStackTrace();
-						}
+						setRudder(((int)controlOutput));
 					}
 					previousControlOutput = (int)Math.round(controlOutput);
 				} else {
-					url = new String("/navigation/rudder/"+((int)rudder.getValue()));
-					try {
-						rudderAngle = GenericGet.getGeneric(url);
-					} catch (RuntimeException e) {
-						e.printStackTrace();
-					}
+					setRudder(((int)rudder.getValue()));
 				}
 				compass.repaint();
 				try {
@@ -246,7 +236,7 @@ public class Navigation {
 				pidController = new PIDControllerAngle(0.1, 0.01, 0.05);
 				pidController.setSetpoint(coursebearing); // Set desired setpoint
 				previousControlOutput = null;
-		}
+			}
 			compass.repaint();
 		});
 
@@ -258,5 +248,29 @@ public class Navigation {
 
 	}
 
+	public void setRudder(int i) {
+		Constant.gg.getGenericAsync(
+				"/navigation/rudder/"+i,
+				result -> {
+					rudderAngle = result;
+				},
+				errorMessage -> {
+					throw new RuntimeException("NO COMMS");
+				}
+				);
+	}
+
+	public Integer getBearing() {
+		Constant.gg.getGenericAsync(
+				"/navigation/bearing",
+				result -> {
+					Navigation.bearing = result;
+				},
+				errorMessage -> {
+					throw new RuntimeException("NO COMMS");
+				}
+				);
+		return Navigation.bearing;
+	}
 
 }

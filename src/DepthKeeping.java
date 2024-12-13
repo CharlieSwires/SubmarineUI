@@ -12,7 +12,6 @@ import javax.swing.JSlider;
 import javax.swing.SwingConstants;
 
 import Const.Constant;
-import GenericGet.GenericGet;
 import pid.PIDControllerAngle;
 
 public class DepthKeeping {
@@ -25,8 +24,6 @@ public class DepthKeeping {
 	private static Integer actualAngle = 0;
 	private static Integer requiredAngle = 0;
 	private static String error;
-	private static final String COMMS_LOST = "COMMUNICATION LOST";
-	private static final String COMMS_OK = "COMMUNICATION OK";
 	// Creating the JSlider
 	private static JSlider diveDepth = new JSlider(JSlider.VERTICAL, -5000, 0, 0); // Arguments: orientation, min, max, initial value
 	// Creating the JSlider
@@ -48,7 +45,7 @@ public class DepthKeeping {
 	private static Integer rudderAngle = 0;
 	private static Integer requestedAngle = 0;
 
-	
+
 	private static JPanel diveAngleGauge = new JPanel() {
 
 		@Override
@@ -94,7 +91,7 @@ public class DepthKeeping {
 				g.drawChars(("SUCCESS"+"     ").toCharArray(), 0, 10, -60+100+(int)(100*Math.sin((+180)/(180.0/Math.PI))), 
 						140+100+30-(int)(100*Math.cos((+180)/(180.0/Math.PI))));
 			}
-			if (error.equals(COMMS_LOST)) {
+			if (error.equals(Constant.COMMS_LOST)) {
 				g.setColor(Color.RED);
 				g.drawChars((error+"     ").toCharArray(), 0, 20, -60+100+(int)(100*Math.sin((+180)/(180.0/Math.PI))), 
 						160+100+30-(int)(100*Math.cos((+180)/(180.0/Math.PI))));
@@ -125,7 +122,7 @@ public class DepthKeeping {
 				diveAngle.setForeground(Color.RED);
 			else
 				diveAngle.setForeground(Color.BLACK);
-			
+
 			if (fillOk == Constant.ERROR)
 				g.setColor(Color.RED);
 			else 
@@ -147,14 +144,7 @@ public class DepthKeeping {
 		switch (action) {
 		case SURFACE:
 			if (diveDepth.getValue() > depth && diveAngle.getValue() > 0) {
-				url = new String("/dive/fill-tank/false");
-				try {
-					DepthKeeping.fillOk = GenericGet.getGeneric(url);
-					error = COMMS_OK;
-				} catch (RuntimeException e) { //need something other end, if COMMS_LOST this won't work.
-					error = COMMS_LOST;
-					e.printStackTrace();
-				}
+				fillTank(false);
 				newPid(diveAngle.getValue());
 				isAlterDepthAngleSet = true;
 				allFull();
@@ -167,14 +157,7 @@ public class DepthKeeping {
 		case CRASH_DIVE:
 			diveAngle.setValue(-45);
 			diveDepth.setValue(-4000); //4m
-			url = new String("/dive/fill-tank/true");
-			try {
-				DepthKeeping.fillOk = GenericGet.getGeneric(url);
-				error = COMMS_OK;
-			} catch (RuntimeException e) { //need something other end, if COMMS_LOST this won't work.
-				error = COMMS_LOST;
-				e.printStackTrace();
-			}
+			fillTank(true);
 			newPid(diveAngle.getValue());
 			isAlterDepthAngleSet = true;
 			allFull();
@@ -183,14 +166,7 @@ public class DepthKeeping {
 		case EMERGENCY_SURFACE:
 			diveAngle.setValue(45);
 			diveDepth.setValue(0);
-			url = new String("/dive/fill-tank/false");
-			try {
-				DepthKeeping.fillOk = GenericGet.getGeneric(url);
-				error = COMMS_OK;
-			} catch (RuntimeException e) { //need something other end, if COMMS_LOST this won't work.
-				error = COMMS_LOST;
-				e.printStackTrace();
-			}
+			fillTank(false);
 			newPid(diveAngle.getValue());
 			isAlterDepthAngleSet = true;
 			allFull();
@@ -217,14 +193,7 @@ public class DepthKeeping {
 			break; 
 		case DIVE:
 			if (-diveDepth.getValue() > -depth && diveAngle.getValue() < 0) {
-				url = new String("/dive/fill-tank/true");
-				try {
-					DepthKeeping.fillOk = GenericGet.getGeneric(url);
-					error = COMMS_OK;
-				} catch (RuntimeException e) { //need something other end, if COMMS_LOST this won't work.
-					error = COMMS_LOST;
-					e.printStackTrace();
-				}
+				fillTank(true);
 				rudderZero();
 				newPid(diveAngle.getValue());
 				isDiveAngleSet = true;
@@ -239,83 +208,111 @@ public class DepthKeeping {
 		}
 		return success;
 	}
+	private static void fillTank(boolean b) {
+		Constant.gg.getGenericAsync(
+				"/dive/fill-tank/"+b,
+				result -> {
+					DepthKeeping.fillOk = result;
+					DepthKeeping.error = Constant.COMMS_OK;
+					diveAngleGauge.repaint();
+				},
+				errorMessage -> {
+					DepthKeeping.error = Constant.COMMS_LOST;
+					diveAngleGauge.repaint();
+				}
+				);	}
+
 	private static void newPid(int diveAngle) {
 		reference(diveAngle);
 		pidController = new PIDControllerAngle(0.1, 0.01, 0.05);
 		previousControlOutput = null;
 	}
 	private static void allFull() {
-		String url;
-		url = new String("/engine/right/" + 100);
-		try {
-			GenericGet.getGeneric(url);
-			error = COMMS_OK;
-		} catch (RuntimeException e) { //need something other end, if COMMS_LOST this won't work.
-			error = COMMS_LOST;
-			e.printStackTrace();
-		}
-		url = new String("/engine/left/" + 100);
-		try {
-			GenericGet.getGeneric(url);
-			error = COMMS_OK;
-		} catch (RuntimeException e) { //need something other end, if COMMS_LOST this won't work.
-			error = COMMS_LOST;
-			e.printStackTrace();
-		}
+		Constant.gg.getGenericAsync(
+				"/engine/right/100",
+				result -> {
+					DepthKeeping.error = Constant.COMMS_OK;
+					diveAngleGauge.repaint();
+				},
+				errorMessage -> {
+					DepthKeeping.error = Constant.COMMS_LOST;
+					diveAngleGauge.repaint();
+				}
+				);
+
+		Constant.gg.getGenericAsync(
+				"/engine/left/100",
+				result -> {
+					DepthKeeping.error = Constant.COMMS_OK;
+					diveAngleGauge.repaint();
+				},
+				errorMessage -> {
+					DepthKeeping.error = Constant.COMMS_LOST;
+					diveAngleGauge.repaint();
+				}
+				);
 	}
 
 	private static void rudderZero() {
-		String url;
-		url = new String("/navigation/rudder/"+0);
-		try {
-			DepthKeeping.rudderAngle = GenericGet.getGeneric(url);
-			error = COMMS_OK;
-		} catch (RuntimeException e) { //need something other end, if COMMS_LOST this won't work.
-			error = COMMS_LOST;
-			e.printStackTrace();
-		}
-
+		Constant.gg.getGenericAsync(
+				"/navigation/rudder/0",
+				result -> {
+					DepthKeeping.rudderAngle = result;
+					DepthKeeping.error = Constant.COMMS_OK;
+					diveAngleGauge.repaint();
+				},
+				errorMessage -> {
+					DepthKeeping.error = Constant.COMMS_LOST;
+					diveAngleGauge.repaint();
+				}
+				);
 	}
 
 	private static void allStop() {
-		String url;
-		url = new String("/engine/right/" + 0);
-		try {
-			GenericGet.getGeneric(url);
-			error = COMMS_OK;
-		} catch (RuntimeException e) { //need something other end, if COMMS_LOST this won't work.
-			error = COMMS_LOST;
-			e.printStackTrace();
-		}
-		url = new String("/engine/left/" + 0);
-		try {
-			GenericGet.getGeneric(url);
-			error = COMMS_OK;
-		} catch (RuntimeException e) { //need something other end, if COMMS_LOST this won't work.
-			error = COMMS_LOST;
-			e.printStackTrace();
-		}
+		Constant.gg.getGenericAsync(
+				"/engine/right/0",
+				result -> {
+					DepthKeeping.error = Constant.COMMS_OK;
+					diveAngleGauge.repaint();
+				},
+				errorMessage -> {
+					DepthKeeping.error = Constant.COMMS_LOST;
+					diveAngleGauge.repaint();
+				}
+				);
+
+		Constant.gg.getGenericAsync(
+				"/engine/left/0",
+				result -> {
+					DepthKeeping.error = Constant.COMMS_OK;
+					diveAngleGauge.repaint();
+				},
+				errorMessage -> {
+					DepthKeeping.error = Constant.COMMS_LOST;
+					diveAngleGauge.repaint();
+				}
+				);
+	}
+	private static int getDepth() {
+		Constant.gg.getGenericAsync(
+				"/dive/depth",
+				result -> {
+					DepthKeeping.depth = result;
+					DepthKeeping.error = Constant.COMMS_OK;
+					diveAngleGauge.repaint();
+				},
+				errorMessage -> {
+					DepthKeeping.error = Constant.COMMS_LOST;
+					resetButtons(original, crashDive, surface, emergencySurface,freeze,dive,alterDepth);
+					//success = quickControls(INSTRUCTION.EMERGENCY_SURFACE, diveAngle, diveDepth, depth);
+					emergencySurface.setBackground(Color.GREEN);
+					diveAngleGauge.repaint();
+				}
+				);
+		return depth; // Depth value will be updated asynchronously
 	}
 
-	private static int getDepth() {
-		String url;
-		Integer depth = 0;
-		try {
-			url = new String("/dive/depth");
-			depth = GenericGet.getGeneric(url);
-			error = COMMS_OK;
-		} catch (RuntimeException e) { //need something other end, if COMMS_LOST this won't work.
-			error = COMMS_LOST;
-			resetButtons(original, crashDive, surface, emergencySurface,freeze,dive,alterDepth);
-			success = quickControls(INSTRUCTION.EMERGENCY_SURFACE, diveAngle, diveDepth, depth);
-			emergencySurface.setBackground(Color.GREEN);
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e1) {
-			}
-		}
-		return depth;
-	}
+
 
 	private static void resetButtons(Color original, JButton emergencyLeft, JButton emergencyRight,
 			JButton emergencyReverse, JButton allStop, JButton dive, JButton alterDepth) {
@@ -334,25 +331,17 @@ public class DepthKeeping {
 		@Override
 		public void run() {
 			while (true) {
-				String url;
 				depth = getDepth();
-				url = new String("/dive/dive-angle");
-				try {
-					actualAngle = GenericGet.getGeneric(url);
-					error = COMMS_OK;
-				} catch (RuntimeException e) {
-					e.printStackTrace();
-					error = COMMS_LOST;
-					continue;
-				}
+				actualAngle = getDiveAngle();
+
 				if ((isDiveAngleSet || isAlterDepthAngleSet) && success && depth != Constant.ERROR) {
 					pidDepthController.setSetpoint(diveDepth.getValue()); // Set desired setpoint
-					
+
 					double diveAngle = pidDepthController.compute(depth);
 
 					if (diveAngle < requiredAngle && requiredAngle < 0) diveAngle = requiredAngle;
 					if (diveAngle > requiredAngle && requiredAngle > 0) diveAngle = requiredAngle;
-					
+
 					pidController.setSetpoint(diveAngle); // Set desired setpoint
 
 					double tempControlO = pidController.compute(actualAngle);
@@ -360,10 +349,7 @@ public class DepthKeeping {
 					tempControlO = tempControlO < -45.0 ? -45.0 : tempControlO;
 					controlOutput = tempControlO;
 					if (previousControlOutput != null && Math.round(controlOutput) != (Integer)previousControlOutput) {
-						url = new String("/dive/front/"+((int)Math.round(controlOutput)));
-						DepthKeeping.requestedAngle = GenericGet.getGeneric(url);
-						url = new String("/dive/back/"+((int)Math.round(-controlOutput)));
-						DepthKeeping.requestedAngle = GenericGet.getGeneric(url);
+						DepthKeeping.requestedAngle = divePlanes(((int)Math.round(controlOutput)));
 					}
 					previousControlOutput = (int)Math.round(controlOutput);
 					previousDepthControlOutput = (int)Math.round(diveAngle);
@@ -378,6 +364,7 @@ public class DepthKeeping {
 			}
 
 		}
+
 	}
 
 	public static void main(String[] args) {
@@ -491,14 +478,8 @@ public class DepthKeeping {
 			diveAngleGauge.repaint();
 		});
 		offsetButton.addActionListener(e -> {
-			String url  = ("/dive/zero");
-			try {
-				GenericGet.getGeneric(url);
-				error = COMMS_OK;
-			} catch (RuntimeException e1) { //need something other end, if COMMS_LOST this won't work.
-				error = COMMS_LOST;
-				e1.printStackTrace();
-			}
+			calibration();
+
 		});
 
 		alterDepth.addActionListener(e -> {
@@ -517,9 +498,70 @@ public class DepthKeeping {
 		// Making the frame visible
 		frame.setVisible(true);
 		DepthKeeping dk = new DepthKeeping();
+
 		MyThread t = dk.new MyThread();
 		t.start();
 
 	}
+
+	private static void calibration() {
+		Constant.gg.getGenericAsync(
+				"/dive/zero",
+				result -> {
+					DepthKeeping.error = Constant.COMMS_OK;
+					diveAngleGauge.repaint();
+				},
+				errorMessage -> {
+					DepthKeeping.error = Constant.COMMS_LOST;
+					diveAngleGauge.repaint();
+				}
+				);		
+	}
+
+	public Integer getDiveAngle() {
+		Constant.gg.getGenericAsync(
+				"/dive/dive-angle",
+				result -> {
+					DepthKeeping.actualAngle = result;
+					DepthKeeping.error = Constant.COMMS_OK;
+					diveAngleGauge.repaint();
+				},
+				errorMessage -> {
+					DepthKeeping.error = Constant.COMMS_LOST;
+					diveAngleGauge.repaint();
+				}
+				);
+		return actualAngle; // Depth value will be updated asynchronously
+	}
+
+	private Integer divePlanes(int i) {
+
+		Constant.gg.getGenericAsync(
+				"/dive/front/"+i,
+				result -> {
+					DepthKeeping.requestedAngle = result;
+					DepthKeeping.error = Constant.COMMS_OK;
+					diveAngleGauge.repaint();
+				},
+				errorMessage -> {
+					DepthKeeping.error = Constant.COMMS_LOST;
+					diveAngleGauge.repaint();
+				}
+				);
+		Constant.gg.getGenericAsync(
+				"/dive/back/"+(-i),
+				result -> {
+					DepthKeeping.requestedAngle = result;
+					DepthKeeping.error = Constant.COMMS_OK;
+					diveAngleGauge.repaint();
+				},
+				errorMessage -> {
+					DepthKeeping.error = Constant.COMMS_LOST;
+					diveAngleGauge.repaint();
+				}
+				);
+		return DepthKeeping.requestedAngle;
+	}
+
 
 }

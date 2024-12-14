@@ -16,6 +16,10 @@ public class EngineRoom {
 	public enum EMERGENCY {
 		ALL_STOP, FULL_LEFT, FULL_RIGHT, ALL_FULL, ALL_BACK
 	}
+	private enum COMMS_STATUS {
+		CPU_GOOD, CPU_DOWN, CPU_COMMS_DOWN, LEFT_GOOD, LEFT_DOWN, LEFT_COMMS_DOWN,
+		RIGHT_GOOD, RIGHT_DOWN, RIGHT_COMMS_DOWN
+	}
 	// Creating the JFrame for the application
 	private static JFrame frame = new JFrame("Engine Room");
 	// Creating the JSlider
@@ -26,6 +30,86 @@ public class EngineRoom {
 	private static JLabel middleTitle = new JLabel("COMMON", SwingConstants.CENTER);
 	private static JLabel rightTitle = new JLabel("RIGHT", SwingConstants.RIGHT);
 	private static Color originalColour = rightTitle.getForeground();
+	private static void updateStatus(COMMS_STATUS stat) {
+		switch(stat) {
+		case CPU_DOWN:
+			frame.setForeground(Color.RED);
+			leftTitle.setForeground(Color.RED);
+			middleTitle.setForeground(Color.RED);
+			rightTitle.setForeground(Color.RED);
+			leftTitle.setText("ERROR");
+			middleTitle.setText("READING");
+			rightTitle.setText("VALUE");
+			break;
+		case CPU_GOOD:
+			frame.setForeground(Color.BLACK);
+			leftTitle.setForeground(originalColour);
+			middleTitle.setForeground(originalColour);
+			rightTitle.setForeground(originalColour);
+			leftTitle.setText("LEFT");
+			middleTitle.setText("COMMON");
+			rightTitle.setText("RIGHT");
+			break;
+		case CPU_COMMS_DOWN:
+			leftTitle.setForeground(Color.RED);
+			middleTitle.setForeground(Color.RED);
+			rightTitle.setForeground(Color.RED);
+			leftTitle.setText("NO");
+			middleTitle.setText("COMMS");
+			rightTitle.setText("FOUND");
+			break;
+		case RIGHT_DOWN:
+			leftTitle.setForeground(Color.RED);
+			middleTitle.setForeground(Color.RED);
+			rightTitle.setForeground(Color.RED);
+			leftTitle.setText("ERROR");
+			middleTitle.setText("IN");
+			rightTitle.setText("SENSOR");
+			break;
+		case RIGHT_GOOD:
+			leftTitle.setForeground(originalColour);
+			middleTitle.setForeground(originalColour);
+			rightTitle.setForeground(originalColour);
+			leftTitle.setText("LEFT");
+			middleTitle.setText("COMMON");
+			rightTitle.setText("RIGHT");
+			break;
+		case RIGHT_COMMS_DOWN:
+			leftTitle.setForeground(Color.RED);
+			middleTitle.setForeground(Color.RED);
+			rightTitle.setForeground(Color.RED);
+			leftTitle.setText("NO");
+			middleTitle.setText("COMMS");
+			rightTitle.setText("FOUND");
+			break;
+		case LEFT_DOWN:
+			leftTitle.setForeground(Color.RED);
+			middleTitle.setForeground(Color.RED);
+			rightTitle.setForeground(Color.RED);
+			leftTitle.setText("ERROR");
+			middleTitle.setText("IN");
+			rightTitle.setText("SENSOR");
+			break;
+		case LEFT_GOOD:
+			leftTitle.setForeground(originalColour);
+			middleTitle.setForeground(originalColour);
+			rightTitle.setForeground(originalColour);
+			leftTitle.setText("LEFT");
+			middleTitle.setText("COMMON");
+			rightTitle.setText("RIGHT");
+			break;
+		case LEFT_COMMS_DOWN:
+			leftTitle.setForeground(Color.RED);
+			middleTitle.setForeground(Color.RED);
+			rightTitle.setForeground(Color.RED);
+			leftTitle.setText("NO");
+			middleTitle.setText("COMMS");
+			rightTitle.setText("FOUND");
+			break;
+		default:
+			throw new RuntimeException("Not a valid stateus");
+		}
+	}
 
 	private static void quickControls(EngineRoom.EMERGENCY action, JSlider slider, JSlider rightslider) {
 		switch (action) {
@@ -66,44 +150,12 @@ public class EngineRoom {
 		@Override
 		public void run() {
 			while (true) {
+				Integer result = getCPUTemp();
+				frame.setTitle("Engine Room temp=" + (result/10.0) + "Celcius");
 				try {
-					Integer result = getCPUTemp();
-					if (result == Constant.ERROR) {
-						frame.setForeground(Color.RED);
-						frame.setTitle("Engine Room temp=" + (result/10.0) + "Celcius");
-						leftTitle.setForeground(Color.RED);
-						middleTitle.setForeground(Color.RED);
-						rightTitle.setForeground(Color.RED);
-						leftTitle.setText("ERROR");
-						middleTitle.setText("READING");
-						rightTitle.setText("VALUE");
-					} else {
-						frame.setForeground(Color.BLACK);
-						frame.setTitle("Engine Room temp=" + (result/10.0) + "Celcius");
-						leftTitle.setForeground(originalColour);
-						middleTitle.setForeground(originalColour);
-						rightTitle.setForeground(originalColour);
-						leftTitle.setText("LEFT");
-						middleTitle.setText("COMMON");
-						rightTitle.setText("RIGHT");						
-					}
-				} catch (RuntimeException e) {
-					leftTitle.setForeground(Color.RED);
-					middleTitle.setForeground(Color.RED);
-					rightTitle.setForeground(Color.RED);
-					leftTitle.setText("NO");
-					middleTitle.setText("COMMS");
-					rightTitle.setText("FOUND");
-					System.out.println(e);
-				}
-				// 1Hz
-				try {
-					MyThread.sleep(1000);
+					Thread.sleep(Constant.tick_ms);
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
 				}
-
 			}
 		}
 	}
@@ -117,64 +169,15 @@ public class EngineRoom {
 			while (true) {
 				//only when changed
 				if (previousSlider != null && !previousSlider.equals(newSlider)) {
-					try {
-						Integer result = setEngineLeft(newSlider);;
-						if (result == Constant.ERROR) {
-							leftTitle.setForeground(Color.RED);
-							middleTitle.setForeground(Color.RED);
-							rightTitle.setForeground(Color.RED);
-							leftTitle.setText("ERROR");
-							middleTitle.setText("IN");
-							rightTitle.setText("SENSOR");
-						} else {
-							leftTitle.setForeground(originalColour);
-							middleTitle.setForeground(originalColour);
-							rightTitle.setForeground(originalColour);
-							leftTitle.setText("LEFT");
-							middleTitle.setText("COMMON");
-							rightTitle.setText("RIGHT");
-						}
-					} catch (RuntimeException e) {
-						leftTitle.setForeground(Color.RED);
-						middleTitle.setForeground(Color.RED);
-						rightTitle.setForeground(Color.RED);
-						leftTitle.setText("NO");
-						middleTitle.setText("COMMS");
-						rightTitle.setText("FOUND");
-						System.out.println(e);
-					}
+					Integer result = setEngineLeft(newSlider);;
 				}
 				previousSlider = newSlider;
 
 				newSlider = slider.getValue();
 				if (previousRightSlider != null && !previousRightSlider.equals(newRightSlider)) {
-					try {
-						Integer result = engineRight(newRightSlider);
-						if (result == Constant.ERROR) {
-							leftTitle.setForeground(Color.RED);
-							middleTitle.setForeground(Color.RED);
-							rightTitle.setForeground(Color.RED);
-							leftTitle.setText("ERROR");
-							middleTitle.setText("IN");
-							rightTitle.setText("SENSOR");
-						} else {
-							leftTitle.setForeground(originalColour);
-							middleTitle.setForeground(originalColour);
-							rightTitle.setForeground(originalColour);
-							leftTitle.setText("LEFT");
-							middleTitle.setText("COMMON");
-							rightTitle.setText("RIGHT");
-						}
-					} catch (RuntimeException e) {
-						leftTitle.setForeground(Color.RED);
-						middleTitle.setForeground(Color.RED);
-						rightTitle.setForeground(Color.RED);
-						leftTitle.setText("NO");
-						middleTitle.setText("COMMS");
-						rightTitle.setText("FOUND");
-						System.out.println(e);
-					}
+					Integer result = engineRight(newRightSlider);
 				}
+
 				previousRightSlider = newRightSlider;
 
 				newRightSlider = rightslider.getValue();
@@ -329,9 +332,15 @@ public class EngineRoom {
 				"/engine/right/"+newRightSlider,
 				result -> {
 					engineRight = result;
+					if (engineRight == Constant.ERROR) {
+						updateStatus(COMMS_STATUS.RIGHT_DOWN);
+					} else {
+						updateStatus(COMMS_STATUS.RIGHT_GOOD);
+
+					}
 				},
 				errorMessage -> {
-					throw new RuntimeException("NO COMMS");
+					updateStatus(COMMS_STATUS.RIGHT_COMMS_DOWN);
 				}
 				);
 		return engineRight;	
@@ -342,9 +351,15 @@ public class EngineRoom {
 				"/engine/left/"+newSlider,
 				result -> {
 					engineLeft = result;
+					if (engineLeft == Constant.ERROR) {
+						updateStatus(COMMS_STATUS.LEFT_DOWN);
+					} else {
+						updateStatus(COMMS_STATUS.LEFT_GOOD);
+
+					}
 				},
 				errorMessage -> {
-					throw new RuntimeException("NO COMMS");
+					updateStatus(COMMS_STATUS.LEFT_COMMS_DOWN);
 				}
 				);
 		return engineLeft;	
@@ -355,9 +370,15 @@ public class EngineRoom {
 				"/engine/cpu-temp",
 				result -> {
 					cpuTemp = result;
+					if (cpuTemp == Constant.ERROR) {
+						updateStatus(COMMS_STATUS.CPU_DOWN);
+					} else {
+						updateStatus(COMMS_STATUS.CPU_GOOD);
+
+					}
 				},
 				errorMessage -> {
-					throw new RuntimeException("NO COMMS");
+					updateStatus(COMMS_STATUS.CPU_COMMS_DOWN);
 				}
 				);
 		return cpuTemp;

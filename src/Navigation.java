@@ -23,7 +23,13 @@ public class Navigation {
 	private static PIDControllerAngle pidController = new PIDControllerAngle(0.1, 0.01, 0.05);
 	private static Integer previousControlOutput = null;
 	private static Integer rudderAngle = 0;
+	private static JLabel leftTitle = new JLabel("RELATIVE", SwingConstants.LEFT);
+	private static JLabel middleTitle = new JLabel("RUDDER", SwingConstants.CENTER);
+	private static JLabel rightTitle = new JLabel("ABSOLUTE", SwingConstants.RIGHT);
 
+	private enum COMMS_STATUS {
+		BEARING_GOOD, BEARING_DOWN, BEARING_COMMS_DOWN, RUDDER_GOOD, RUDDER_DOWN, RUDDER_COMMS_DOWN
+	}
 	// Creating the JSlider
 	private static JSlider rudder = new JSlider(JSlider.HORIZONTAL, -45, 45, 0); // Arguments: orientation, min, max, initial value
 	private static JPanel compass = new JPanel() {
@@ -191,9 +197,6 @@ public class Navigation {
 		// Adding the panel to the frame
 		frame.add(rightpanel, BorderLayout.EAST);
 		JButton setCourse = new JButton("Set Course");
-		JLabel leftTitle = new JLabel("RELATIVE", SwingConstants.LEFT);
-		JLabel middleTitle = new JLabel("RUDDER", SwingConstants.CENTER);
-		JLabel rightTitle = new JLabel("ABSOLUTE", SwingConstants.RIGHT);
 		JPanel toppanel = new JPanel();
 		toppanel.add(setCourse);
 		toppanel.add(leftTitle);
@@ -253,9 +256,14 @@ public class Navigation {
 				"/navigation/rudder/"+i,
 				result -> {
 					rudderAngle = result;
+					if (rudderAngle == Constant.ERROR) {
+						updateStatus(COMMS_STATUS.RUDDER_DOWN);
+					} else {
+						updateStatus(COMMS_STATUS.RUDDER_GOOD);
+					}
 				},
 				errorMessage -> {
-					throw new RuntimeException("NO COMMS");
+					updateStatus(COMMS_STATUS.RUDDER_COMMS_DOWN);
 				}
 				);
 	}
@@ -265,12 +273,73 @@ public class Navigation {
 				"/navigation/bearing",
 				result -> {
 					Navigation.bearing = result;
+					if (bearing == Constant.ERROR) {
+						updateStatus(COMMS_STATUS.BEARING_DOWN);
+					} else {
+						updateStatus(COMMS_STATUS.BEARING_GOOD);
+					}
 				},
 				errorMessage -> {
-					throw new RuntimeException("NO COMMS");
+					updateStatus(COMMS_STATUS.BEARING_COMMS_DOWN);
 				}
 				);
 		return Navigation.bearing;
+	}
+
+	private void updateStatus(Navigation.COMMS_STATUS stat) {
+		switch(stat) {
+		case RUDDER_DOWN:
+			leftTitle.setText("RUDDER");
+			middleTitle.setText("CONTROL");
+			rightTitle.setText("FAILED");
+			leftTitle.setForeground(Color.RED);
+			middleTitle.setForeground(Color.RED);
+			rightTitle.setForeground(Color.RED);
+			break;
+		case RUDDER_GOOD:
+			leftTitle.setText("RELATIVE");
+			middleTitle.setText("RUDDER");
+			rightTitle.setText("ABSOLUTE");
+			leftTitle.setForeground(Color.BLACK);
+			middleTitle.setForeground(Color.BLACK);
+			rightTitle.setForeground(Color.BLACK);
+			break;
+		case RUDDER_COMMS_DOWN:
+			leftTitle.setText("NO");
+			middleTitle.setText("COMMS");
+			rightTitle.setText("FOUND");
+			leftTitle.setForeground(Color.RED);
+			middleTitle.setForeground(Color.RED);
+			rightTitle.setForeground(Color.RED);
+			break;
+		case BEARING_DOWN:
+			leftTitle.setText("BEARING");
+			middleTitle.setText("SENSOR");
+			rightTitle.setText("FAILED");
+			leftTitle.setForeground(Color.RED);
+			middleTitle.setForeground(Color.RED);
+			rightTitle.setForeground(Color.RED);
+			break;
+		case BEARING_GOOD:
+			leftTitle.setText("RELATIVE");
+			middleTitle.setText("RUDDER");
+			rightTitle.setText("ABSOLUTE");
+			leftTitle.setForeground(Color.BLACK);
+			middleTitle.setForeground(Color.BLACK);
+			rightTitle.setForeground(Color.BLACK);
+			break;
+		case BEARING_COMMS_DOWN:
+			leftTitle.setText("NO");
+			middleTitle.setText("COMMS");
+			rightTitle.setText("FOUND");
+			leftTitle.setForeground(Color.RED);
+			middleTitle.setForeground(Color.RED);
+			rightTitle.setForeground(Color.RED);
+			break;
+		default:
+			break;
+
+		}
 	}
 
 }

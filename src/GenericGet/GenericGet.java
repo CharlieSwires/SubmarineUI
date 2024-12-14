@@ -31,7 +31,7 @@ public class GenericGet {
             while (retries > 0) {
                 Future<Integer> future = executor.submit(() -> {
                     URL url = new URL(Constant.PI_HOME + Constant.PORT + Constant.PATH_PREFIX + suffix);
-                    log.info(url.toString());
+                    //System.out.print(url.toString());
                     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                     conn.setRequestMethod("GET");
                     conn.setRequestProperty("Accept", "application/json");
@@ -48,6 +48,7 @@ public class GenericGet {
                             inString.append(output);
                         }
                         conn.disconnect();
+                        //System.out.println(inString.toString()); 
                         return Integer.parseInt(inString.toString());
                     }
                 });

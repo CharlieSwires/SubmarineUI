@@ -23,7 +23,7 @@ public class DepthKeeping {
 	private static boolean success =true;
 	private static Integer actualAngle = 0;
 	private static Integer requiredAngle = 0;
-	private static String error;
+	private static String error = Constant.COMMS_OK;
 	// Creating the JSlider
 	private static JSlider diveDepth = new JSlider(JSlider.VERTICAL, -5000, 0, 0); // Arguments: orientation, min, max, initial value
 	// Creating the JSlider

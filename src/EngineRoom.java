@@ -10,7 +10,6 @@ import javax.swing.JSlider;
 import javax.swing.SwingConstants;
 
 import Const.Constant;
-import GenericGet.GenericGet;
 
 public class EngineRoom {
 	public enum EMERGENCY {

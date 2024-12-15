@@ -10,9 +10,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.logging.Logger;
 
 import Const.Constant;
 
@@ -23,7 +21,7 @@ public class GenericGet {
 	private static final ExecutorService executor = Executors.newCachedThreadPool(); // Thread pool for async tasks
 	private static final int MAX_RETRIES = 5;
     private static final int TIMEOUT_SECONDS = 5; // Timeout for each request
-    private static final Logger log = LoggerFactory.getLogger(GenericGet.class);
+    private static final Logger log = Logger.getLogger(GenericGet.class.getName());
 
     public void getGenericAsync(String suffix, Consumer<Integer> onSuccess, Consumer<String> onError) {
         executor.submit(() -> {
@@ -59,10 +57,10 @@ public class GenericGet {
                     return; // Exit if successful
                 } catch (TimeoutException e) {
                     future.cancel(true); // Cancel the task
-                    log.error("Request timed out after " + TIMEOUT_SECONDS + " seconds", e);
+                    log.severe("Request timed out after " + TIMEOUT_SECONDS + " seconds"+ e.getMessage());
                     retries--;
                 } catch (Exception e) {
-                    log.error("Error in HTTP request. Retries left: " + retries, e);
+                    log.severe("Error in HTTP request. Retries left: " + retries+ e.getMessage());
                     retries--;
                 }
 

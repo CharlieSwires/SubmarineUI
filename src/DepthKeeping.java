@@ -127,7 +127,7 @@ public class DepthKeeping {
 				g.setColor(Color.RED);
 			else 
 				g.setColor(Color.BLACK);
-			g.drawChars(("Tanks Filling: "+ (fillOk == 1 ? "Yes":"No")+"       ").toCharArray(), 0, 24, -60+100+(int)(100*Math.sin((+180)/(180.0/Math.PI))), 
+			g.drawChars(("Tanks Filling: "+ (fillOk > 0 ? "Yes":"No")+"       ").toCharArray(), 0, 24, -60+100+(int)(100*Math.sin((+180)/(180.0/Math.PI))), 
 					200+100+30-(int)(100*Math.cos((+180)/(180.0/Math.PI))));
 
 

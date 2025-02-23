@@ -144,7 +144,7 @@ public class DepthKeeping {
 		switch (action) {
 		case SURFACE:
 			if (diveDepth.getValue() > depth && diveAngle.getValue() > 0) {
-				fillTank(false);
+				fillTank(-Constant.PUMP_POWER);
 				newPid(diveAngle.getValue());
 				isAlterDepthAngleSet = true;
 				allFull();
@@ -157,7 +157,7 @@ public class DepthKeeping {
 		case CRASH_DIVE:
 			diveAngle.setValue(-45);
 			diveDepth.setValue(-4000); //4m
-			fillTank(true);
+			fillTank(Constant.PUMP_POWER);
 			newPid(diveAngle.getValue());
 			isAlterDepthAngleSet = true;
 			allFull();
@@ -166,7 +166,7 @@ public class DepthKeeping {
 		case EMERGENCY_SURFACE:
 			diveAngle.setValue(45);
 			diveDepth.setValue(0);
-			fillTank(false);
+			fillTank(-Constant.PUMP_POWER);
 			newPid(diveAngle.getValue());
 			isAlterDepthAngleSet = true;
 			allFull();
@@ -193,7 +193,7 @@ public class DepthKeeping {
 			break; 
 		case DIVE:
 			if (-diveDepth.getValue() > -depth && diveAngle.getValue() < 0) {
-				fillTank(true);
+				fillTank(Constant.PUMP_POWER);
 				rudderZero();
 				newPid(diveAngle.getValue());
 				isDiveAngleSet = true;
@@ -208,7 +208,7 @@ public class DepthKeeping {
 		}
 		return success;
 	}
-	private static void fillTank(boolean b) {
+	private static void fillTank(Integer b) {
 		Constant.gg.getGenericAsync(
 				"/dive/fill-tank/"+b,
 				result -> {

@@ -561,7 +561,7 @@ public class DepthKeeping {
 	}
 
 	private Integer divePlanes(int i) {
-
+		if (i != DepthKeeping.requestedAngle) {
 		Constant.gg.getGenericAsync(
 				"/dive/front/"+i,
 				result -> {
@@ -577,7 +577,6 @@ public class DepthKeeping {
 		Constant.gg.getGenericAsync(
 				"/dive/back/"+(-i),
 				result -> {
-					DepthKeeping.requestedAngle = result;
 					DepthKeeping.error = Constant.COMMS_OK;
 					diveAngleGauge.repaint();
 				},
@@ -586,6 +585,7 @@ public class DepthKeeping {
 					diveAngleGauge.repaint();
 				}
 				);
+		}
 		return DepthKeeping.requestedAngle;
 	}
 

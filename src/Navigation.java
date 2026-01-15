@@ -254,6 +254,7 @@ public class Navigation {
 
 
 	public void setRudder(int i) {
+		if (i != rudderAngle) {
 		Constant.gg.getGenericAsync(
 				"/navigation/rudder/"+i,
 				result -> {
@@ -268,6 +269,7 @@ public class Navigation {
 					updateStatus(COMMS_STATUS.RUDDER_COMMS_DOWN);
 				}
 				);
+		}
 	}
 
 	public Integer getBearing() {

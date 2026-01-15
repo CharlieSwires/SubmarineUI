@@ -2,6 +2,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.util.Date;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -25,6 +26,7 @@ public class Navigation {
 	private static JLabel leftTitle = new JLabel("RELATIVE", SwingConstants.LEFT);
 	private static JLabel middleTitle = new JLabel("RUDDER", SwingConstants.CENTER);
 	private static JLabel rightTitle = new JLabel("ABSOLUTE", SwingConstants.RIGHT);
+	private static Date angleLastCheckTime = new Date();
 
 	private enum COMMS_STATUS {
 		BEARING_GOOD, BEARING_DOWN, BEARING_COMMS_DOWN, RUDDER_GOOD, RUDDER_DOWN, RUDDER_COMMS_DOWN
@@ -250,6 +252,7 @@ public class Navigation {
 
 	}
 
+
 	public void setRudder(int i) {
 		Constant.gg.getGenericAsync(
 				"/navigation/rudder/"+i,
@@ -268,6 +271,17 @@ public class Navigation {
 	}
 
 	public Integer getBearing() {
+		Date newTime = null;
+		try {
+			newTime = new Date();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if ((newTime.getTime() - angleLastCheckTime.getTime() ) < Constant.sensor_read_ms) {
+			return Navigation.bearing;
+		}
+
 		Constant.gg.getGenericAsync(
 				"/navigation/bearing",
 				result -> {
@@ -282,6 +296,7 @@ public class Navigation {
 					updateStatus(COMMS_STATUS.BEARING_COMMS_DOWN);
 				}
 				);
+		angleLastCheckTime = new Date();
 		return Navigation.bearing;
 	}
 

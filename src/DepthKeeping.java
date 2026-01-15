@@ -2,6 +2,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.util.Date;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -44,6 +45,8 @@ public class DepthKeeping {
 	private static Integer fillOk = 0;
 	private static Integer rudderAngle = 0;
 	private static Integer requestedAngle = 0;
+	private static Date lastCheckTime = new Date();;
+	private static Date angleLastCheckTime = new Date();
 
 
 	private static JPanel diveAngleGauge = new JPanel() {
@@ -294,6 +297,16 @@ public class DepthKeeping {
 				);
 	}
 	private static int getDepth() {
+		Date newTime = null;
+		try {
+			newTime = new Date();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if ((newTime.getTime() - lastCheckTime.getTime()) < Constant.sensor_read_ms) {
+			return depth;
+		}
 		Constant.gg.getGenericAsync(
 				"/dive/depth",
 				result -> {
@@ -309,6 +322,7 @@ public class DepthKeeping {
 					diveAngleGauge.repaint();
 				}
 				);
+		lastCheckTime = new Date();
 		return depth; // Depth value will be updated asynchronously
 	}
 
@@ -518,7 +532,18 @@ public class DepthKeeping {
 				);		
 	}
 
+
 	public Integer getDiveAngle() {
+		Date newTime = null;
+		try {
+			newTime = new Date();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if ((newTime.getTime() - angleLastCheckTime.getTime() ) < Constant.sensor_read_ms) {
+			return actualAngle;
+		}
 		Constant.gg.getGenericAsync(
 				"/dive/dive-angle",
 				result -> {
@@ -531,6 +556,7 @@ public class DepthKeeping {
 					diveAngleGauge.repaint();
 				}
 				);
+		angleLastCheckTime = new Date();
 		return actualAngle; // Depth value will be updated asynchronously
 	}
 

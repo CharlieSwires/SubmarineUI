@@ -14,8 +14,8 @@ build
 Playing the Video Stream
 ------------------------
 
-<p>On your PC which is sharing it's WiFi hotspot with the Pi
-connect to rtsp://192.168.137.205:8554/ on VLC. Your IP address may be different.</p>
+<p>On your PC which is sharing it's WiFi hotspot with the Pi.  run the following: vlc rtsp://192.168.137.15:8554/ --network-caching=100 --clock-jitter=0 --clock-synchro=0</p>
+<p>If the WiFi is stable reduce network-caching=50 if not increase to 150.Your IP address may be different.</p>
 <img src="https://raw.githubusercontent.com/CharlieSwires/SubmarineUI/master/VLCFromPi.png" width="640" height="480" alt="VLCFromPi" title="VLC From Pi On Host"/>
 
 User Interface

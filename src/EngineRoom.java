@@ -152,7 +152,7 @@ public class EngineRoom {
 				Integer result = getCPUTemp();
 				frame.setTitle("Engine Room temp=" + (result/10.0) + "Celcius");
 				try {
-					Thread.sleep(Constant.tick_ms);
+					Thread.sleep(Constant.sensor_read_ms);
 				} catch (InterruptedException e) {
 				}
 			}

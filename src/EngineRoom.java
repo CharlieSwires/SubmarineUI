@@ -29,6 +29,7 @@ public class EngineRoom {
 	private static JLabel middleTitle = new JLabel("COMMON", SwingConstants.CENTER);
 	private static JLabel rightTitle = new JLabel("RIGHT", SwingConstants.RIGHT);
 	private static Color originalColour = rightTitle.getForeground();
+	private static JButton powerButton = new JButton("Power OFF");
 	private static int engineLeft;
 	private static int engineRight;
 	private static int cpuTemp;
@@ -208,6 +209,13 @@ public class EngineRoom {
 				previousRightSlider = newRightSlider;
 
 				newRightSlider = rightslider.getValue();
+				if (EngineRoom.power == 1) {
+					powerButton.setBackground(Color.RED);
+					powerButton.setText("Power ON");
+				} else {
+					powerButton.setBackground(Color.GREEN);
+					powerButton.setText("Power OFF");
+				}
 				//10Hz
 				try {
 					MyThread.sleep(Constant.tick_ms);
@@ -300,10 +308,9 @@ public class EngineRoom {
 		JButton emergencyReverse = new JButton("Emergency Reverse");
 		JButton allFull = new JButton("All Full");
 		JButton allStop = new JButton("All Stop");
-		JButton power = new JButton("Power OFF");
 		JPanel bottompanel = new JPanel();
-		bottompanel.add(power);
-		power.setBackground(Color.GREEN);
+		bottompanel.add(powerButton);
+		powerButton.setBackground(Color.GREEN);
 		bottompanel.add(emergencyReverse);
 		bottompanel.add(allStop);
 		bottompanel.add(allFull);
@@ -344,14 +351,10 @@ public class EngineRoom {
 			resetButtons(original, emergencyLeft, emergencyRight, emergencyReverse,allStop,allFull);
 			quickControls(EMERGENCY.ALL_FULL, slider, rightslider);
 			allFull.setBackground(Color.GREEN);});
-		power.addActionListener(e -> {
+		powerButton.addActionListener(e -> {
 			if (EngineRoom.power == 0) {
-				power.setBackground(Color.RED);
-				power.setText("Power ON");
 				setPower(true);
 			} else {
-				power.setBackground(Color.GREEN);
-				power.setText("Power OFF");
 				setPower(false);
 			}
 			});

@@ -17,7 +17,7 @@ public class EngineRoom {
 	}
 	private enum COMMS_STATUS {
 		CPU_GOOD, CPU_DOWN, CPU_COMMS_DOWN, LEFT_GOOD, LEFT_DOWN, LEFT_COMMS_DOWN,
-		RIGHT_GOOD, RIGHT_DOWN, RIGHT_COMMS_DOWN
+		RIGHT_GOOD, RIGHT_DOWN, RIGHT_COMMS_DOWN, POWER_COMMS_DOWN, POWER_GOOD, POWER_DOWN
 	}
 	// Creating the JFrame for the application
 	private static JFrame frame = new JFrame("Engine Room");
@@ -29,6 +29,10 @@ public class EngineRoom {
 	private static JLabel middleTitle = new JLabel("COMMON", SwingConstants.CENTER);
 	private static JLabel rightTitle = new JLabel("RIGHT", SwingConstants.RIGHT);
 	private static Color originalColour = rightTitle.getForeground();
+	private static int engineLeft;
+	private static int engineRight;
+	private static int cpuTemp;
+	private static int power = 0;
 	private static void updateStatus(COMMS_STATUS stat) {
 		switch(stat) {
 		case CPU_DOWN:
@@ -104,6 +108,30 @@ public class EngineRoom {
 			leftTitle.setText("NO");
 			middleTitle.setText("COMMS");
 			rightTitle.setText("FOUND");
+			break;
+		case POWER_COMMS_DOWN:
+			leftTitle.setForeground(Color.RED);
+			middleTitle.setForeground(Color.RED);
+			rightTitle.setForeground(Color.RED);
+			leftTitle.setText("NO");
+			middleTitle.setText("COMMS");
+			rightTitle.setText("FOUND");
+			break;
+		case POWER_DOWN:
+			leftTitle.setForeground(Color.RED);
+			middleTitle.setForeground(Color.RED);
+			rightTitle.setForeground(Color.RED);
+			leftTitle.setText("ERROR");
+			middleTitle.setText("IN");
+			rightTitle.setText("SENSOR");
+			break;
+		case POWER_GOOD:
+			leftTitle.setForeground(originalColour);
+			middleTitle.setForeground(originalColour);
+			rightTitle.setForeground(originalColour);
+			leftTitle.setText("LEFT");
+			middleTitle.setText("COMMON");
+			rightTitle.setText("RIGHT");
 			break;
 		default:
 			throw new RuntimeException("Not a valid stateus");
@@ -272,7 +300,10 @@ public class EngineRoom {
 		JButton emergencyReverse = new JButton("Emergency Reverse");
 		JButton allFull = new JButton("All Full");
 		JButton allStop = new JButton("All Stop");
+		JButton power = new JButton("Power OFF");
 		JPanel bottompanel = new JPanel();
+		bottompanel.add(power);
+		power.setBackground(Color.GREEN);
 		bottompanel.add(emergencyReverse);
 		bottompanel.add(allStop);
 		bottompanel.add(allFull);
@@ -313,6 +344,17 @@ public class EngineRoom {
 			resetButtons(original, emergencyLeft, emergencyRight, emergencyReverse,allStop,allFull);
 			quickControls(EMERGENCY.ALL_FULL, slider, rightslider);
 			allFull.setBackground(Color.GREEN);});
+		power.addActionListener(e -> {
+			if (EngineRoom.power == 0) {
+				power.setBackground(Color.RED);
+				power.setText("Power ON");
+				setPower(true);
+			} else {
+				power.setBackground(Color.GREEN);
+				power.setText("Power OFF");
+				setPower(false);
+			}
+			});
 
 		// Making the frame visible
 		frame.setVisible(true);
@@ -321,10 +363,9 @@ public class EngineRoom {
 		MyThreadTemperature t2 = er.new MyThreadTemperature();
 		t.start();
 		t2.start();
+		setPower(false);
+
 	}
-	private static int engineLeft;
-	private static int engineRight;
-	private static int cpuTemp;
 
 	public Integer engineRight(Integer newRightSlider) {
 		Constant.gg.getGenericAsync(
@@ -362,6 +403,24 @@ public class EngineRoom {
 				}
 				);
 		return engineLeft;	
+	}
+	public static Integer setPower(boolean enable) {
+		Constant.gg.getGenericAsync(
+				"/dive/power/"+(enable? 1 : 0),
+				result -> {
+					power = result;
+					if (power == Constant.ERROR) {
+						updateStatus(COMMS_STATUS.POWER_DOWN);
+					} else {
+						updateStatus(COMMS_STATUS.POWER_GOOD);
+
+					}
+				},
+				errorMessage -> {
+					updateStatus(COMMS_STATUS.POWER_COMMS_DOWN);
+				}
+				);
+		return power;	
 	}
 
 	public Integer getCPUTemp() {

@@ -36,7 +36,7 @@ public class GenericGet {
                     conn.setRequestProperty("Content-Type", "application/json");
 
                     if (conn.getResponseCode() != 200) {
-                        throw new RuntimeException("HTTP error code: " + conn.getResponseCode());
+                        throw new RuntimeException("HTTP error code: " + url + conn.getResponseCode());
                     }
 
                     try (BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {

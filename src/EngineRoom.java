@@ -8,6 +8,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 
 import Const.Constant;
 
@@ -209,13 +210,6 @@ public class EngineRoom {
 				previousRightSlider = newRightSlider;
 
 				newRightSlider = rightslider.getValue();
-				if (EngineRoom.power == 1) {
-					powerButton.setBackground(Color.RED);
-					powerButton.setText("Power ON");
-				} else {
-					powerButton.setBackground(Color.GREEN);
-					powerButton.setText("Power OFF");
-				}
 				//10Hz
 				try {
 					MyThread.sleep(Constant.tick_ms);
@@ -407,23 +401,60 @@ public class EngineRoom {
 				);
 		return engineLeft;	
 	}
-	public static Integer setPower(boolean enable) {
-		Constant.gg.getGenericAsync(
-				"/dive/power/"+(enable? 1 : 0),
-				result -> {
-					power = result;
-					if (power == Constant.ERROR) {
-						updateStatus(COMMS_STATUS.POWER_DOWN);
-					} else {
-						updateStatus(COMMS_STATUS.POWER_GOOD);
+	public static void setPower(boolean enable) {
+	    Constant.gg.getGenericAsync(
+	        "/dive/power/" + (enable ? 1 : 0),
 
-					}
-				},
-				errorMessage -> {
-					updateStatus(COMMS_STATUS.POWER_COMMS_DOWN);
-				}
-				);
-		return power;	
+	        result -> {
+	            power = result;
+
+	            SwingUtilities.invokeLater(() -> {
+	                if (power == Constant.ERROR) {
+	                    updateStatus(COMMS_STATUS.POWER_DOWN);
+	                    return;
+	                }
+
+	                updateStatus(COMMS_STATUS.POWER_GOOD);
+
+	                if (power == 1) {
+	                    powerButton.setBackground(Color.RED);
+	                    powerButton.setText("Power ON");
+	                } else {
+	                    powerButton.setBackground(Color.GREEN);
+	                    powerButton.setText("Power OFF");
+	                }
+	            });
+	        },
+
+	        errorMessage -> {
+	            SwingUtilities.invokeLater(() ->
+	                updateStatus(COMMS_STATUS.POWER_COMMS_DOWN)
+	            );
+	        }
+	    );
+	}
+	public static void getPower() {
+	    Constant.gg.getGenericAsync(
+	        "/dive/power",
+	        result -> {
+	            power = result;
+
+	            SwingUtilities.invokeLater(() -> {
+	                if (power == 1) {
+	                    powerButton.setBackground(Color.RED);
+	                    powerButton.setText("Power ON");
+	                } else {
+	                    powerButton.setBackground(Color.GREEN);
+	                    powerButton.setText("Power OFF");
+	                }
+	            });
+	        },
+	        errorMessage -> {
+	            SwingUtilities.invokeLater(() ->
+	                updateStatus(COMMS_STATUS.POWER_COMMS_DOWN)
+	            );
+	        }
+	    );
 	}
 
 	public Integer getCPUTemp() {

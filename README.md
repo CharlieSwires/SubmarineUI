@@ -5,6 +5,8 @@ SubmarineUI
 
 <p>This contains both the Java and .class files</p>
 
+<p>Download vlc https://images.videolan.org/vlc/ for your operating system and change the PATH environment variable to that of the downloaded vlc directory.</p>
+
 build
 -----
 <p>I've used JDK17.</p>

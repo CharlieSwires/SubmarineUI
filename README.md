@@ -7,6 +7,8 @@ SubmarineUI
 
 <p>Download vlc https://images.videolan.org/vlc/ for your operating system and change the PATH environment variable to that of the downloaded vlc directory.</p>
 
+<p> example directory /c/Program Files/VideoLAN/VLC</p>
+
 build
 -----
 <p>I've used JDK17.</p>

@@ -62,10 +62,12 @@ Navigation.java
 
 All Together
 ------------
+
+<p>Click the following image for a video</p>
+<a href="https://youtu.be/mx0LpK5e7RQ">
 <img src="https://raw.githubusercontent.com/CharlieSwires/SubmarineUI/master/All.png" width="800" height="450" alt="All" title="All Together"/>
+</a>
 
 <p> Const contains the IP address of the Pi and the port number. </p>
 <p> GenericGet contains the get request used by all of the UI.</p>
 <p> pid contains the pid controller used for dive angle and navigation.</p>
-
-<a href="https://youtu.be/mx0LpK5e7RQ">Demo</a>

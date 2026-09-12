@@ -39,6 +39,7 @@ SUCCESS indicates UI used correctly i.e. depth and max pitch entered correctly f
 EngineRoom.java
 ---------------
 <img src="https://raw.githubusercontent.com/CharlieSwires/SubmarineUI/master/EngineRoomNoComms.png" width="500" height="500" alt="EngineRoomNoComms" title="Engine Room No Comms"/>
+<p>0.	Power for motors and pumps, on off.</p>
 <p>1.	Emergency Left full right forward full left reverse.</p>
 <p>2.	Emergency Right full right reverse full left forward.</p>
 <p>3.	Emergency Reverse full both back</p>

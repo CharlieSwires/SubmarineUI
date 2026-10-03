@@ -229,8 +229,8 @@ public class EngineRoom {
 		@Override
 		public void run() {
 			while (true) {
-				Integer result = getCPUTemp();
-				frame.setTitle("Engine Room temp=" + (result/10.0) + "Celcius");
+				getCPUTemp();
+				frame.setTitle("Engine Room temp=" + (cpuTemp/10.0) + "Celcius");
 				try {
 					Thread.sleep(Constant.sensor_read_ms);
 				} catch (InterruptedException e) {
@@ -251,13 +251,13 @@ public class EngineRoom {
 			while (true) {
 				//only when changed
 				if (previousSlider != null && !previousSlider.equals(newSlider)) {
-					Integer result = setEngineLeft(newSlider);
+					setEngineLeft(newSlider);
 				}
 				previousSlider = newSlider;
 
 				newSlider = slider.getValue();
 				if (previousRightSlider != null && !previousRightSlider.equals(newRightSlider)) {
-					Integer result = engineRight(newRightSlider);
+					engineRight(newRightSlider);
 				}
 
 				previousRightSlider = newRightSlider;
@@ -277,7 +277,6 @@ public class EngineRoom {
 				try {
 					MyThread.sleep(Constant.tick_ms);
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -453,7 +452,7 @@ public class EngineRoom {
 				}
 				);
 	}
-	public Integer engineRight(Integer newRightSlider) {
+	public void engineRight(Integer newRightSlider) {
 		Constant.gg.getGenericAsync(
 				"/engine/right/"+newRightSlider,
 				result -> {
@@ -473,10 +472,9 @@ public class EngineRoom {
 					});
 				}
 				);
-		return engineRight;	
 	}
 
-	public Integer setEngineLeft(Integer newSlider) {
+	public void setEngineLeft(Integer newSlider) {
 		Constant.gg.getGenericAsync(
 				"/engine/left/"+newSlider,
 				result -> {
@@ -498,7 +496,6 @@ public class EngineRoom {
 
 				}
 				);
-		return engineLeft;	
 	}
 	public static void setPower(boolean enable) {
 		Constant.gg.getGenericAsync(
@@ -556,7 +553,7 @@ public class EngineRoom {
 				);
 	}
 
-	public Integer getCPUTemp() {
+	public void getCPUTemp() {
 		Constant.gg.getGenericAsync(
 				"/engine/cpu-temp",
 				result -> {
@@ -577,7 +574,6 @@ public class EngineRoom {
 
 				}
 				);
-		return cpuTemp;
 	}
 
 }

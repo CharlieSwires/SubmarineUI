@@ -211,7 +211,7 @@ public class DepthKeeping {
 		}
 		return success;
 	}
-	private static void fillTank(Integer b) {
+	public static void fillTank(Integer b) {
 		Constant.gg.getGenericAsync(
 				"/dive/fill-tank/"+b,
 				result -> {

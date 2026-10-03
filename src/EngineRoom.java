@@ -1,6 +1,7 @@
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.sql.Date;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -14,18 +15,20 @@ import Const.Constant;
 
 public class EngineRoom {
 	public enum EMERGENCY {
-		ALL_STOP, FULL_LEFT, FULL_RIGHT, ALL_FULL, ALL_BACK
+		ALL_STOP, FULL_LEFT, FULL_RIGHT, ALL_FULL, ALL_BACK, CALIBRATION, CALIBRATION_END
 	}
 	private enum COMMS_STATUS {
 		CPU_GOOD, CPU_DOWN, CPU_COMMS_DOWN, LEFT_GOOD, LEFT_DOWN, LEFT_COMMS_DOWN,
 		RIGHT_GOOD, RIGHT_DOWN, RIGHT_COMMS_DOWN, POWER_COMMS_DOWN, POWER_GOOD, POWER_DOWN
 	}
+	public static EMERGENCY action = EMERGENCY.CALIBRATION;
 	// Creating the JFrame for the application
 	private static JFrame frame = new JFrame("Engine Room");
 	// Creating the JSlider
 	private static JSlider slider = new JSlider(JSlider.VERTICAL, -100, 100, 0); // Arguments: orientation, min, max, initial value
 	// Creating the JSlider
 	private static JSlider rightslider = new JSlider(JSlider.VERTICAL, -100, 100, 0); // Arguments: orientation, min, max, initial value
+	private static JSlider commonslider = new JSlider(JSlider.VERTICAL, -100, 100, 0); // Arguments: orientation, min, max, initial value	private static JLabel leftTitle = new JLabel("LEFT", SwingConstants.LEFT);
 	private static JLabel leftTitle = new JLabel("LEFT", SwingConstants.LEFT);
 	private static JLabel middleTitle = new JLabel("COMMON", SwingConstants.CENTER);
 	private static JLabel rightTitle = new JLabel("RIGHT", SwingConstants.RIGHT);
@@ -35,6 +38,8 @@ public class EngineRoom {
 	private static int engineRight;
 	private static int cpuTemp;
 	private static int power = 0;
+	private static Long calibrationStart = null;
+
 	private static void updateStatus(COMMS_STATUS stat) {
 		switch(stat) {
 		case CPU_DOWN:
@@ -141,27 +146,42 @@ public class EngineRoom {
 	}
 
 	private static void quickControls(EngineRoom.EMERGENCY action, JSlider slider, JSlider rightslider) {
+		EngineRoom.action = action;
 		switch (action) {
 		case ALL_STOP:
 			slider.setValue(0);
 			rightslider.setValue(0);
+			commonslider.setValue(0);
 			break;
 		case FULL_LEFT:
+			commonslider.setValue(0);
 			slider.setValue(-100);
 			rightslider.setValue(100);
 			break; 
 		case FULL_RIGHT:
+			commonslider.setValue(0);
 			slider.setValue(100);
 			rightslider.setValue(-100);
 			break; 
 		case ALL_FULL:
 			slider.setValue(100);
 			rightslider.setValue(100);
+			commonslider.setValue(100);
 			break; 
 		case ALL_BACK:
 			slider.setValue(-100);
 			rightslider.setValue(-100);
+			commonslider.setValue(-100);
 			break;
+		case CALIBRATION:
+			if (calibrationStart == null) {
+				calibrationStart = System.currentTimeMillis();
+			}
+			break;
+		case CALIBRATION_END:
+			calibrationStart = null;
+			break;
+	
 		default:
 			throw new IllegalArgumentException("action out of range!!");
 		}
@@ -188,6 +208,9 @@ public class EngineRoom {
 			}
 		}
 	}
+	
+
+	
 	private class MyThread extends Thread {
 		Integer newSlider = slider.getValue();
 		Integer previousSlider = null;
@@ -198,7 +221,7 @@ public class EngineRoom {
 			while (true) {
 				//only when changed
 				if (previousSlider != null && !previousSlider.equals(newSlider)) {
-					Integer result = setEngineLeft(newSlider);;
+					Integer result = setEngineLeft(newSlider);
 				}
 				previousSlider = newSlider;
 
@@ -210,6 +233,16 @@ public class EngineRoom {
 				previousRightSlider = newRightSlider;
 
 				newRightSlider = rightslider.getValue();
+				if (action == EMERGENCY.CALIBRATION && calibrationStart != null && (System.currentTimeMillis() - calibrationStart) < 5000) {
+					commonslider.setValue(0);
+					slider.setValue(0);
+					rightslider.setValue(0);
+					setEngineLeft(slider.getValue());
+					engineRight(rightslider.getValue());
+					EngineRoom.pumps(0);				
+				} else if (action == EMERGENCY.CALIBRATION && calibrationStart != null && (System.currentTimeMillis() - calibrationStart) >= 5000) {
+					quickControls(EMERGENCY.CALIBRATION_END, slider, rightslider);
+				}
 				//10Hz
 				try {
 					MyThread.sleep(Constant.tick_ms);
@@ -248,7 +281,7 @@ public class EngineRoom {
 		// Adding the panel to the frame
 		frame.add(panel, BorderLayout.WEST);
 		// Creating the JSlider
-		JSlider commonslider = new JSlider(JSlider.VERTICAL, -100, 100, 0); // Arguments: orientation, min, max, initial value
+		
 		// Get the current preferred size, double it, and set it back
 		Dimension commonpreferredSize = commonslider.getPreferredSize();
 		commonpreferredSize.width *= 4; // Double the width
@@ -362,6 +395,11 @@ public class EngineRoom {
 		t2.start();
 		setPower(false);
 
+	}
+
+	public static void pumps(int i) {
+		DepthKeeping.fillTank(i);
+		
 	}
 
 	public Integer engineRight(Integer newRightSlider) {

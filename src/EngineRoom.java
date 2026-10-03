@@ -21,7 +21,7 @@ public class EngineRoom {
 		CPU_GOOD, CPU_DOWN, CPU_COMMS_DOWN, LEFT_GOOD, LEFT_DOWN, LEFT_COMMS_DOWN,
 		RIGHT_GOOD, RIGHT_DOWN, RIGHT_COMMS_DOWN, POWER_COMMS_DOWN, POWER_GOOD, POWER_DOWN, PUMPS_DOWN, PUMPS_UP, PUMPS_COMMS_DOWN
 	}
-	public static EMERGENCY action = EMERGENCY.CALIBRATION;
+	public static EMERGENCY action = EMERGENCY.CALIBRATION_END;
 	// Creating the JFrame for the application
 	public static JFrame frame = new JFrame("Engine Room");
 	// Creating the JSlider
@@ -515,17 +515,21 @@ public class EngineRoom {
 						if (power == 1) {
 							powerButton.setBackground(Color.RED);
 							powerButton.setText("Power ON");
+							quickControls(EMERGENCY.CALIBRATION, slider, rightslider);
 						} else {
 							powerButton.setBackground(Color.GREEN);
 							powerButton.setText("Power OFF");
+							quickControls(EMERGENCY.CALIBRATION_END, slider, rightslider);
 						}
 					});
 				},
 
 				errorMessage -> {
-					SwingUtilities.invokeLater(() ->
-					updateStatus(COMMS_STATUS.POWER_COMMS_DOWN)
-							);
+					SwingUtilities.invokeLater(() -> {
+						updateStatus(COMMS_STATUS.POWER_COMMS_DOWN);
+						quickControls(EMERGENCY.CALIBRATION_END, slider, rightslider);
+					}
+					);
 				}
 				);
 	}

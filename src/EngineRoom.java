@@ -19,11 +19,11 @@ public class EngineRoom {
 	}
 	private enum COMMS_STATUS {
 		CPU_GOOD, CPU_DOWN, CPU_COMMS_DOWN, LEFT_GOOD, LEFT_DOWN, LEFT_COMMS_DOWN,
-		RIGHT_GOOD, RIGHT_DOWN, RIGHT_COMMS_DOWN, POWER_COMMS_DOWN, POWER_GOOD, POWER_DOWN
+		RIGHT_GOOD, RIGHT_DOWN, RIGHT_COMMS_DOWN, POWER_COMMS_DOWN, POWER_GOOD, POWER_DOWN, PUMPS_DOWN, PUMPS_UP, PUMPS_COMMS_DOWN
 	}
 	public static EMERGENCY action = EMERGENCY.CALIBRATION;
 	// Creating the JFrame for the application
-	private static JFrame frame = new JFrame("Engine Room");
+	public static JFrame frame = new JFrame("Engine Room");
 	// Creating the JSlider
 	private static JSlider slider = new JSlider(JSlider.VERTICAL, -100, 100, 0); // Arguments: orientation, min, max, initial value
 	// Creating the JSlider
@@ -39,6 +39,7 @@ public class EngineRoom {
 	private static int cpuTemp;
 	private static int power = 0;
 	private static Long calibrationStart = null;
+	private static Integer pumps;
 
 	private static void updateStatus(COMMS_STATUS stat) {
 		switch(stat) {
@@ -140,6 +141,35 @@ public class EngineRoom {
 			middleTitle.setText("COMMON");
 			rightTitle.setText("RIGHT");
 			break;
+		case PUMPS_DOWN:
+			leftTitle.setForeground(Color.RED);
+			middleTitle.setForeground(Color.RED);
+			rightTitle.setForeground(Color.RED);
+			leftTitle.setText("ERROR");
+			middleTitle.setText("IN");
+			rightTitle.setText("SENSOR");
+			break;
+		case PUMPS_UP:
+			leftTitle.setForeground(originalColour);
+			rightTitle.setForeground(originalColour);
+			leftTitle.setText("LEFT");
+			if (EngineRoom.action == EMERGENCY.CALIBRATION) {
+				middleTitle.setForeground(Color.RED);
+				middleTitle.setText("CALIBRATION");
+			} else {
+				middleTitle.setForeground(originalColour);
+				middleTitle.setText("COMMOM");
+			}
+			rightTitle.setText("RIGHT");
+			break;
+		case PUMPS_COMMS_DOWN:
+			leftTitle.setForeground(Color.RED);
+			middleTitle.setForeground(Color.RED);
+			rightTitle.setForeground(Color.RED);
+			leftTitle.setText("NO");
+			middleTitle.setText("COMMS");
+			rightTitle.setText("FOUND");
+			break;
 		default:
 			throw new RuntimeException("Not a valid stateus");
 		}
@@ -181,7 +211,7 @@ public class EngineRoom {
 		case CALIBRATION_END:
 			calibrationStart = null;
 			break;
-	
+
 		default:
 			throw new IllegalArgumentException("action out of range!!");
 		}
@@ -208,9 +238,9 @@ public class EngineRoom {
 			}
 		}
 	}
-	
 
-	
+
+
 	private class MyThread extends Thread {
 		Integer newSlider = slider.getValue();
 		Integer previousSlider = null;
@@ -281,7 +311,7 @@ public class EngineRoom {
 		// Adding the panel to the frame
 		frame.add(panel, BorderLayout.WEST);
 		// Creating the JSlider
-		
+
 		// Get the current preferred size, double it, and set it back
 		Dimension commonpreferredSize = commonslider.getPreferredSize();
 		commonpreferredSize.width *= 4; // Double the width
@@ -384,7 +414,7 @@ public class EngineRoom {
 			} else {
 				setPower(false);
 			}
-			});
+		});
 
 		// Making the frame visible
 		frame.setVisible(true);
@@ -398,24 +428,49 @@ public class EngineRoom {
 	}
 
 	public static void pumps(int i) {
-		DepthKeeping.fillTank(i);
-		
-	}
+		Constant.gg.getGenericAsync(
+				"/dive/fill-tank/" + i,
 
+				result -> {
+					pumps = result;
+					SwingUtilities.invokeLater(() -> {
+						// update whatever visual indication you want here
+						if (pumps == Constant.ERROR) {
+							updateStatus(COMMS_STATUS.PUMPS_DOWN);
+						} else {
+							updateStatus(COMMS_STATUS.PUMPS_UP);
+						}
+						frame.revalidate();
+						frame.repaint();
+					});
+				},
+
+				errorMessage -> {
+					SwingUtilities.invokeLater(() -> {
+						updateStatus(COMMS_STATUS.PUMPS_COMMS_DOWN);
+						frame.repaint();
+					});
+				}
+				);
+	}
 	public Integer engineRight(Integer newRightSlider) {
 		Constant.gg.getGenericAsync(
 				"/engine/right/"+newRightSlider,
 				result -> {
-					engineRight = result;
-					if (engineRight == Constant.ERROR) {
-						updateStatus(COMMS_STATUS.RIGHT_DOWN);
-					} else {
-						updateStatus(COMMS_STATUS.RIGHT_GOOD);
+					SwingUtilities.invokeLater(() -> {
+						engineRight = result;
+						if (engineRight == Constant.ERROR) {
+							updateStatus(COMMS_STATUS.RIGHT_DOWN);
+						} else {
+							updateStatus(COMMS_STATUS.RIGHT_GOOD);
+						}
+					});
 
-					}
 				},
 				errorMessage -> {
-					updateStatus(COMMS_STATUS.RIGHT_COMMS_DOWN);
+					SwingUtilities.invokeLater(() -> {
+						updateStatus(COMMS_STATUS.RIGHT_COMMS_DOWN);
+					});
 				}
 				);
 		return engineRight;	
@@ -425,90 +480,101 @@ public class EngineRoom {
 		Constant.gg.getGenericAsync(
 				"/engine/left/"+newSlider,
 				result -> {
-					engineLeft = result;
-					if (engineLeft == Constant.ERROR) {
-						updateStatus(COMMS_STATUS.LEFT_DOWN);
-					} else {
-						updateStatus(COMMS_STATUS.LEFT_GOOD);
+					SwingUtilities.invokeLater(() -> {
+						engineLeft = result;
+						if (engineLeft == Constant.ERROR) {
+							updateStatus(COMMS_STATUS.LEFT_DOWN);
+						} else {
+							updateStatus(COMMS_STATUS.LEFT_GOOD);
 
-					}
+						}
+					});
+
 				},
 				errorMessage -> {
-					updateStatus(COMMS_STATUS.LEFT_COMMS_DOWN);
+					SwingUtilities.invokeLater(() -> {
+						updateStatus(COMMS_STATUS.LEFT_COMMS_DOWN);
+					});
+
 				}
 				);
 		return engineLeft;	
 	}
 	public static void setPower(boolean enable) {
-	    Constant.gg.getGenericAsync(
-	        "/dive/power/" + (enable ? 1 : 0),
+		Constant.gg.getGenericAsync(
+				"/dive/power/" + (enable ? 1 : 0),
 
-	        result -> {
-	            power = result;
+				result -> {
+					power = result;
 
-	            SwingUtilities.invokeLater(() -> {
-	                if (power == Constant.ERROR) {
-	                    updateStatus(COMMS_STATUS.POWER_DOWN);
-	                    return;
-	                }
+					SwingUtilities.invokeLater(() -> {
+						if (power == Constant.ERROR) {
+							updateStatus(COMMS_STATUS.POWER_DOWN);
+							return;
+						}
 
-	                updateStatus(COMMS_STATUS.POWER_GOOD);
+						updateStatus(COMMS_STATUS.POWER_GOOD);
 
-	                if (power == 1) {
-	                    powerButton.setBackground(Color.RED);
-	                    powerButton.setText("Power ON");
-	                } else {
-	                    powerButton.setBackground(Color.GREEN);
-	                    powerButton.setText("Power OFF");
-	                }
-	            });
-	        },
+						if (power == 1) {
+							powerButton.setBackground(Color.RED);
+							powerButton.setText("Power ON");
+						} else {
+							powerButton.setBackground(Color.GREEN);
+							powerButton.setText("Power OFF");
+						}
+					});
+				},
 
-	        errorMessage -> {
-	            SwingUtilities.invokeLater(() ->
-	                updateStatus(COMMS_STATUS.POWER_COMMS_DOWN)
-	            );
-	        }
-	    );
+				errorMessage -> {
+					SwingUtilities.invokeLater(() ->
+					updateStatus(COMMS_STATUS.POWER_COMMS_DOWN)
+							);
+				}
+				);
 	}
 	public static void getPower() {
-	    Constant.gg.getGenericAsync(
-	        "/dive/power",
-	        result -> {
-	            power = result;
+		Constant.gg.getGenericAsync(
+				"/dive/power",
+				result -> {
+					power = result;
 
-	            SwingUtilities.invokeLater(() -> {
-	                if (power == 1) {
-	                    powerButton.setBackground(Color.RED);
-	                    powerButton.setText("Power ON");
-	                } else {
-	                    powerButton.setBackground(Color.GREEN);
-	                    powerButton.setText("Power OFF");
-	                }
-	            });
-	        },
-	        errorMessage -> {
-	            SwingUtilities.invokeLater(() ->
-	                updateStatus(COMMS_STATUS.POWER_COMMS_DOWN)
-	            );
-	        }
-	    );
+					SwingUtilities.invokeLater(() -> {
+						if (power == 1) {
+							powerButton.setBackground(Color.RED);
+							powerButton.setText("Power ON");
+						} else {
+							powerButton.setBackground(Color.GREEN);
+							powerButton.setText("Power OFF");
+						}
+					});
+				},
+				errorMessage -> {
+					SwingUtilities.invokeLater(() ->
+					updateStatus(COMMS_STATUS.POWER_COMMS_DOWN)
+							);
+				}
+				);
 	}
 
 	public Integer getCPUTemp() {
 		Constant.gg.getGenericAsync(
 				"/engine/cpu-temp",
 				result -> {
-					cpuTemp = result;
-					if (cpuTemp == Constant.ERROR) {
-						updateStatus(COMMS_STATUS.CPU_DOWN);
-					} else {
-						updateStatus(COMMS_STATUS.CPU_GOOD);
-
-					}
+					SwingUtilities.invokeLater(() -> {
+						cpuTemp = result;
+						if (cpuTemp == Constant.ERROR) {
+							updateStatus(COMMS_STATUS.CPU_DOWN);
+						} else {
+							updateStatus(COMMS_STATUS.CPU_GOOD);
+						}
+					});
 				},
 				errorMessage -> {
-					updateStatus(COMMS_STATUS.CPU_COMMS_DOWN);
+					SwingUtilities.invokeLater(() -> {
+
+						updateStatus(COMMS_STATUS.CPU_COMMS_DOWN);
+					});
+
 				}
 				);
 		return cpuTemp;

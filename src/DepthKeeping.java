@@ -223,7 +223,8 @@ public class DepthKeeping {
 					DepthKeeping.error = Constant.COMMS_LOST;
 					diveAngleGauge.repaint();
 				}
-				);	}
+				);
+	}
 
 	private static void newPid(int diveAngle) {
 		reference(diveAngle);

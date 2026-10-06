@@ -22,6 +22,7 @@ public class EngineRoom {
 		RIGHT_GOOD, RIGHT_DOWN, RIGHT_COMMS_DOWN, POWER_COMMS_DOWN, POWER_GOOD, POWER_DOWN, PUMPS_DOWN, PUMPS_UP, PUMPS_COMMS_DOWN
 	}
 	public static EMERGENCY action = EMERGENCY.CALIBRATION_END;
+	private static final int CALIBRATION_TIME = 5000;
 	// Creating the JFrame for the application
 	public static JFrame frame = new JFrame("Engine Room");
 	// Creating the JSlider
@@ -263,14 +264,14 @@ public class EngineRoom {
 				previousRightSlider = newRightSlider;
 
 				newRightSlider = rightslider.getValue();
-				if (calibrationStart != null && (System.currentTimeMillis() - calibrationStart) < 5000) {
+				if (calibrationStart != null && (System.currentTimeMillis() - calibrationStart) < CALIBRATION_TIME) {
 					commonslider.setValue(0);
 					slider.setValue(0);
 					rightslider.setValue(0);
 					setEngineLeft(slider.getValue());
 					engineRight(rightslider.getValue());
 					EngineRoom.pumps(0);				
-				} else if (calibrationStart != null && (System.currentTimeMillis() - calibrationStart) >= 5000) {
+				} else if (calibrationStart != null && (System.currentTimeMillis() - calibrationStart) >= CALIBRATION_TIME) {
 					quickControls(EMERGENCY.CALIBRATION_END, slider, rightslider);
 				}
 				//10Hz

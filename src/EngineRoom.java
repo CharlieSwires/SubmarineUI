@@ -263,14 +263,14 @@ public class EngineRoom {
 				previousRightSlider = newRightSlider;
 
 				newRightSlider = rightslider.getValue();
-				if (action == EMERGENCY.CALIBRATION && calibrationStart != null && (System.currentTimeMillis() - calibrationStart) < 5000) {
+				if (calibrationStart != null && (System.currentTimeMillis() - calibrationStart) < 5000) {
 					commonslider.setValue(0);
 					slider.setValue(0);
 					rightslider.setValue(0);
 					setEngineLeft(slider.getValue());
 					engineRight(rightslider.getValue());
 					EngineRoom.pumps(0);				
-				} else if (action == EMERGENCY.CALIBRATION && calibrationStart != null && (System.currentTimeMillis() - calibrationStart) >= 5000) {
+				} else if (calibrationStart != null && (System.currentTimeMillis() - calibrationStart) >= 5000) {
 					quickControls(EMERGENCY.CALIBRATION_END, slider, rightslider);
 				}
 				//10Hz

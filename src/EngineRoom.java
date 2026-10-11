@@ -44,7 +44,7 @@ public class EngineRoom {
 	private static int engineRight;
 	private static int cpuTemp;
 	private static int power = 0;
-	private static Long calibrationStart = null;
+	private static volatile Long calibrationStart = null;
 	private static Integer pumps;
 
 	private static void updateStatus(COMMS_STATUS stat) {
@@ -255,20 +255,7 @@ public class EngineRoom {
 		@Override
 		public void run() {
 			while (true) {
-				//only when changed
-				if (previousSlider != null && !previousSlider.equals(newSlider)) {
-					setEngineLeft(newSlider);
-				}
-				previousSlider = newSlider;
 
-				newSlider = slider.getValue();
-				if (previousRightSlider != null && !previousRightSlider.equals(newRightSlider)) {
-					engineRight(newRightSlider);
-				}
-
-				previousRightSlider = newRightSlider;
-
-				newRightSlider = rightslider.getValue();
 				if (calibrationStart != null && (System.currentTimeMillis() - calibrationStart) < CALIBRATION_TIME) {
 					commonslider.setValue(0);
 					slider.setValue(0);
@@ -278,10 +265,28 @@ public class EngineRoom {
 					EngineRoom.pumps(0);				
 				} else if (calibrationStart != null && (System.currentTimeMillis() - calibrationStart) >= CALIBRATION_TIME) {
 					quickControls(EMERGENCY.CALIBRATION_END, slider, rightslider);
+				} else {
+					if (previousSlider != null && !previousSlider.equals(newSlider)) {
+						setEngineLeft(newSlider);
+					}
+					previousSlider = newSlider;
+
+					newSlider = slider.getValue();
+					if (previousRightSlider != null && !previousRightSlider.equals(newRightSlider)) {
+						engineRight(newRightSlider);
+					}
+
+					previousRightSlider = newRightSlider;
+
+					newRightSlider = rightslider.getValue();
 				}
 				//10Hz
 				try {
-					MyThread.sleep(Constant.tick_ms);
+					if (calibrationStart != null && (System.currentTimeMillis() - calibrationStart) < CALIBRATION_TIME) {
+						MyThread.sleep(Constant.calibration_tick_ms);
+					} else {
+						MyThread.sleep(Constant.tick_ms);
+					}
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
